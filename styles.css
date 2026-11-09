@@ -684,3 +684,86 @@ footer {
 @keyframes blink {
   50% { opacity: 0; }
 }
+
+/* ============= EXPERIENCE TIMELINE ============= */
+.experience { border-top: 1px solid var(--border); }
+.exp-list { border-top: 1px solid var(--border); }
+.exp-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2.5rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.exp-when {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.exp-when .badge {
+  display: inline-block;
+  margin-top: 0.6rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.68rem;
+}
+.exp-body h3 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+.exp-org {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin: 0.3rem 0 1rem;
+  letter-spacing: 0.04em;
+}
+.exp-body ul { list-style: none; }
+.exp-body li {
+  position: relative;
+  padding: 0.35rem 0 0.35rem 1.4rem;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+.exp-body li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+.exp-body li strong { color: var(--text); font-weight: 600; }
+@media (max-width: 768px) {
+  .exp-item { grid-template-columns: 1fr; gap: 0.8rem; }
+}
+
+/* ============= FIELD NOTES ============= */
+.notes { border-top: 1px solid var(--border); }
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.note {
+  background: var(--bg);
+  padding: 1.8rem;
+}
+.note-when {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+.note h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.6rem; }
+.note p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; }
+@media (max-width: 900px) { .notes-grid { grid-template-columns: 1fr; } }
+
+.projects-grid.three { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 1000px) { .projects-grid.three { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .projects-grid.three { grid-template-columns: 1fr; } }
+.project-card.small { min-height: 0; }
+.stat-num.sm { font-size: 1.5rem; }
