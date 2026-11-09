@@ -8,54 +8,60 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<nav class="nav" aria-label="Main">
-  <a class="nav-name" href="index.html">Sanjith B.K.</a>
-  <ul>
-    <li><a href="index.html#experience">Experience</a></li>
-    <li><a href="index.html#work">Work</a></li>
-    <li><a href="index.html#contact">Contact</a></li>
-  </ul>
-</nav>
-<header class="board small">
-  <div class="inner">
-    <a class="back" href="index.html#work">Back to all work</a>
-    <div class="label">
-      <div class="tape" aria-hidden="true"></div>
-      <div class="row"><div class="cell title-cell">
-        <span class="field">Personal, for Fragrance Castle</span>
-        <h1>SwiftPack</h1>
-      </div></div>
-      <div class="row specs"><div class="cell"><span class="field">Role</span><span class="val">Solo build</span></div><div class="cell"><span class="field">Stack</span><span class="val">Raspberry Pi, Python</span></div><div class="cell"><span class="field">First label</span><span class="val">4 min → 42 s</span></div><div class="cell"><span class="field">Each label after</span><span class="val">30 s → 10 s</span></div></div>
-    </div>
+
+<header class="dark">
+  <nav class="nav wrap" aria-label="Main">
+    <a class="home" href="index.html">Sanjith B.K.</a>
+    <ul>
+      <li><a href="index.html#experience">Experience</a></li>
+      <li><a href="index.html#work">Work</a></li>
+      <li><a href="index.html#borders">Across borders</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+  <div class="wrap p-hero">
+    <a class="back" href="index.html#work">Back to work</a>
+    <p class="kind">Personal, for Fragrance Castle</p>
+    <h1>SwiftPack</h1>
+    <p class="lede">A packing terminal that pulls Shopee, Lazada and Shopify orders onto one screen and prints labels in one tap.</p>
+    <dl class="specs"><div><dt>Role</dt><dd>Solo build</dd></div><div><dt>Stack</dt><dd>Raspberry Pi, Python</dd></div><div><dt>First label</dt><dd>4 min → 42 s</dd></div><div><dt>Each label after</dt><dd>30 s → 10 s</dd></div></dl>
   </div>
 </header>
-<main class="page case">
-<div class="shot">Photo to add: the terminal on the packing bench</div>
-<section class="block"><h2>The problem</h2><div class="prose"><p>Fragrance Castle sells on Shopee, Lazada and Shopify. Each has its own seller portal, its own sign-in and its own way of making a shipping label. Packing an order meant signing in, finding it, downloading the label and sending it to the printer, then doing it all again on the next platform.</p>
+<main class="wrap case">
+  <div class="lead-pic"><div class="shot" data-hint="Photo to add: the terminal on the packing bench (save as swiftpack.jpg)"><img src="swiftpack.jpg" alt="SwiftPack" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></div></div>
+<section class="section"><h2>The problem</h2><div class="prose"><p>Fragrance Castle sells on Shopee, Lazada and Shopify. Each has its own seller portal, its own sign-in and its own way of making a shipping label. Packing an order meant signing in, finding it, downloading the label and sending it to the printer, then doing it all again on the next platform.</p>
 <p>Packing was never the slow part. <strong>The time went into everything around it.</strong> The first label of the day took about 4 minutes, mostly sign-ins, and every label after that took about 30 seconds.</p></div></section>
-<section class="block"><h2>What I built</h2><div class="prose"><p>A small terminal that sits on the packing bench. It goes straight past the sign-in step, pulls pending orders from all three platforms through their APIs, and prints the label with one tap.</p>
+<section class="section"><h2>What I built</h2><div class="prose"><p>A small terminal that sits on the packing bench. It goes straight past the sign-in step, pulls pending orders from all three platforms through their APIs, and prints the label with one tap.</p>
 <ul class="plain">
 <li><strong>Hardware:</strong> Raspberry Pi, touchscreen and a thermal label printer</li>
 <li><strong>Software:</strong> Python, with requests for the platform APIs and Flask for the interface</li>
 <li><strong>Interface:</strong> modelled on the Bambu Lab X1C printer screen, with big touch targets and very little text, because it gets used in a hurry with full hands</li>
 </ul>
-<div class="shots"><div class="shot sq">Screenshot to add: order list</div><div class="shot sq">Screenshot to add: print view</div></div></div></section>
-<section class="block"><h2>Results</h2><div class="prose"><table class="results">
+<div class="shots"><div class="shot empty" data-hint="Screenshot to add: order list"></div><div class="shot empty" data-hint="Screenshot to add: print view"></div></div></div></section>
+<section class="section"><h2>Results</h2><div class="prose"><table class="results">
 <tr><td>First label of the day</td><td>4 min to <strong>42 s</strong></td></tr>
 <tr><td>Each label after that</td><td>30 s to <strong>10 s</strong></td></tr>
 <tr><td>Platforms in one view</td><td>Shopee, Lazada, Shopify</td></tr>
 </table>
 <p style="margin-top:1.25rem" class="prose">The biggest saving came from removing the sign-in step, the least visible part of the job and the most expensive.</p></div></section>
-<section class="block"><h2>Next</h2><div class="prose"><ul class="plain">
+<section class="section"><h2>Next</h2><div class="prose"><ul class="plain">
 <li>Finish and harden the build for daily use</li>
 <li>Try running it on cheaper hardware than a full Raspberry Pi</li>
 <li>Find out whether other small sellers on the same three platforms have the same problem</li>
 </ul></div></section>
-<section class="block"><nav class="next-proj" aria-label="More projects"><span></span><a href="solar-dryer.html" style="text-align:right"><span>Next</span>Solar food dryer</a></nav></section>
+<section class="section"><nav class="pager" aria-label="More work"><span></span><a href="solar-dryer.html" style="text-align:right"><small>Next</small>Solar food dryer</a></nav></section>
 </main>
-<footer>
-  <span>Sanjith Bangalore Kumaraswamy, Singapore</span>
-  <span>Last updated November 2026</span>
+<footer class="dark" id="contact">
+  <div class="wrap contact">
+    <h2>Get in touch</h2>
+    <p>Open to internships from September 2027, in consulting, operations or engineering. Happy to talk wherever you're based.</p>
+    <ul>
+      <li><a href="mailto:bksanjith@gmail.com">bksanjith@gmail.com</a></li>
+      <li><a href="https://www.linkedin.com/in/sanjith-bangalore-kumaraswamy-878bab113/" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="tel:+6581634076">+65 8163 4076</a></li>
+    </ul>
+  </div>
+  <div class="wrap foot"><span>Sanjith Bangalore Kumaraswamy</span><span>Based in Singapore, working across borders</span></div>
 </footer>
 </body>
 </html>

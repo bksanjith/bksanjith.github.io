@@ -8,42 +8,48 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<nav class="nav" aria-label="Main">
-  <a class="nav-name" href="index.html">Sanjith B.K.</a>
-  <ul>
-    <li><a href="index.html#experience">Experience</a></li>
-    <li><a href="index.html#work">Work</a></li>
-    <li><a href="index.html#contact">Contact</a></li>
-  </ul>
-</nav>
-<header class="board small">
-  <div class="inner">
-    <a class="back" href="index.html#work">Back to all work</a>
-    <div class="label">
-      <div class="tape" aria-hidden="true"></div>
-      <div class="row"><div class="cell title-cell">
-        <span class="field">SUTD coursework</span>
-        <h1>Rubber band car</h1>
-      </div></div>
-      <div class="row specs"><div class="cell"><span class="field">Type</span><span class="val">Coursework</span></div><div class="cell"><span class="field">Power</span><span class="val">Elastic energy</span></div><div class="cell"><span class="field">Focus</span><span class="val">Mechanical design</span></div><div class="cell"><span class="field">Constraint</span><span class="val">Fixed energy</span></div></div>
-    </div>
+
+<header class="dark">
+  <nav class="nav wrap" aria-label="Main">
+    <a class="home" href="index.html">Sanjith B.K.</a>
+    <ul>
+      <li><a href="index.html#experience">Experience</a></li>
+      <li><a href="index.html#work">Work</a></li>
+      <li><a href="index.html#borders">Across borders</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+  <div class="wrap p-hero">
+    <a class="back" href="index.html#work">Back to work</a>
+    <p class="kind">SUTD coursework</p>
+    <h1>Rubber band car</h1>
+    <p class="lede">A vehicle driven only by energy stored in a wound rubber band, designed around weight, friction and drive ratio.</p>
+    <dl class="specs"><div><dt>Type</dt><dd>Coursework</dd></div><div><dt>Power</dt><dd>Elastic energy</dd></div><div><dt>Focus</dt><dd>Mechanical design</dd></div><div><dt>Constraint</dt><dd>Fixed energy</dd></div></dl>
   </div>
 </header>
-<main class="page case">
-<div class="shot">Photo to add: the finished car</div>
-<section class="block"><h2>The brief</h2><div class="prose"><p>Build a car powered entirely by a rubber band. All the energy available is whatever you store by winding it before release, so every gram of weight and every bit of friction comes straight out of the distance travelled.</p></div></section>
-<section class="block"><h2>Design priorities</h2><div class="prose"><ul class="plain">
+<main class="wrap case">
+  <div class="lead-pic"><div class="shot" data-hint="Photo to add: the finished car (save as rubberband-car.jpg)"><img src="rubberband-car.jpg" alt="Rubber band car" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></div></div>
+<section class="section"><h2>The brief</h2><div class="prose"><p>Build a car powered entirely by a rubber band. All the energy available is whatever you store by winding it before release, so every gram of weight and every bit of friction comes straight out of the distance travelled.</p></div></section>
+<section class="section"><h2>Design priorities</h2><div class="prose"><ul class="plain">
 <li><strong>A light chassis</strong> so more of the stored energy goes into motion</li>
 <li><strong>Low-friction axles</strong>, since smooth rotation matters more than raw torque</li>
 <li><strong>Wheel to axle ratio</strong>, which trades top speed against distance</li>
 </ul>
-<div class="shots"><div class="shot sq">Photo to add: chassis and drive</div><div class="shot sq">Photo to add: winding mechanism</div></div></div></section>
-<section class="block"><h2>What I took away</h2><div class="prose"><p>A fixed energy budget is a useful way to look at most design problems. Every decision either keeps energy, money or time in the system or wastes it, and simple and light usually beats clever and heavy.</p></div></section>
-<section class="block"><nav class="next-proj" aria-label="More projects"><a href="holographic.html"><span>Previous</span>Holographic email notifier</a><span></span></nav></section>
+<div class="shots"><div class="shot empty" data-hint="Photo to add: chassis and drive"></div><div class="shot empty" data-hint="Photo to add: winding mechanism"></div></div></div></section>
+<section class="section"><h2>What I took away</h2><div class="prose"><p>A fixed energy budget is a useful way to look at most design problems. Every decision either keeps energy, money or time in the system or wastes it, and simple and light usually beats clever and heavy.</p></div></section>
+<section class="section"><nav class="pager" aria-label="More work"><a href="holographic.html"><small>Previous</small>Holographic email notifier</a><span></span></nav></section>
 </main>
-<footer>
-  <span>Sanjith Bangalore Kumaraswamy, Singapore</span>
-  <span>Last updated November 2026</span>
+<footer class="dark" id="contact">
+  <div class="wrap contact">
+    <h2>Get in touch</h2>
+    <p>Open to internships from September 2027, in consulting, operations or engineering. Happy to talk wherever you're based.</p>
+    <ul>
+      <li><a href="mailto:bksanjith@gmail.com">bksanjith@gmail.com</a></li>
+      <li><a href="https://www.linkedin.com/in/sanjith-bangalore-kumaraswamy-878bab113/" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="tel:+6581634076">+65 8163 4076</a></li>
+    </ul>
+  </div>
+  <div class="wrap foot"><span>Sanjith Bangalore Kumaraswamy</span><span>Based in Singapore, working across borders</span></div>
 </footer>
 </body>
 </html>

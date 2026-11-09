@@ -8,43 +8,49 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<nav class="nav" aria-label="Main">
-  <a class="nav-name" href="index.html">Sanjith B.K.</a>
-  <ul>
-    <li><a href="index.html#experience">Experience</a></li>
-    <li><a href="index.html#work">Work</a></li>
-    <li><a href="index.html#contact">Contact</a></li>
-  </ul>
-</nav>
-<header class="board small">
-  <div class="inner">
-    <a class="back" href="index.html#work">Back to all work</a>
-    <div class="label">
-      <div class="tape" aria-hidden="true"></div>
-      <div class="row"><div class="cell title-cell">
-        <span class="field">SUTD coursework</span>
-        <h1>Variable capacitor</h1>
-      </div></div>
-      <div class="row specs"><div class="cell"><span class="field">Type</span><span class="val">Coursework</span></div><div class="cell"><span class="field">Range</span><span class="val">2 to 40 nF</span></div><div class="cell"><span class="field">Accuracy</span><span class="val">± 2 nF</span></div><div class="cell"><span class="field">Grade</span><span class="val">Highest marks</span></div></div>
-    </div>
+
+<header class="dark">
+  <nav class="nav wrap" aria-label="Main">
+    <a class="home" href="index.html">Sanjith B.K.</a>
+    <ul>
+      <li><a href="index.html#experience">Experience</a></li>
+      <li><a href="index.html#work">Work</a></li>
+      <li><a href="index.html#borders">Across borders</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+  <div class="wrap p-hero">
+    <a class="back" href="index.html#work">Back to work</a>
+    <p class="kind">SUTD coursework</p>
+    <h1>Variable capacitor</h1>
+    <p class="lede">A hand-built capacitor tunable from 2 to 40 nF, measured to within ± 2 nF. Awarded highest marks.</p>
+    <dl class="specs"><div><dt>Type</dt><dd>Coursework</dd></div><div><dt>Range</dt><dd>2 to 40 nF</dd></div><div><dt>Accuracy</dt><dd>± 2 nF</dd></div><div><dt>Grade</dt><dd>Highest marks</dd></div></dl>
   </div>
 </header>
-<main class="page case">
-<div class="shot">Photo to add: the finished capacitor</div>
-<section class="block"><h2>The brief</h2><div class="prose"><p>Design and build a capacitor whose value can be adjusted across a set range, then show that the measured values match what you designed for. Making something that changes capacitance is the easy part. <strong>Making it read accurately across the whole range</strong> is where most attempts fall short.</p></div></section>
-<section class="block"><h2>The approach</h2><div class="prose"><p>A capacitor's value depends on how much the plates overlap, the gap between them and the material in between. I worked out the expected capacitance at points across the range, built the device, measured it, and adjusted until the measured values lined up with the calculated ones.</p>
-<div class="shots"><div class="shot sq">Photo to add: plates and adjustment</div><div class="shot sq">Photo to add: meter readings</div></div></div></section>
-<section class="block"><h2>Results</h2><div class="prose"><table class="results">
+<main class="wrap case">
+  <div class="lead-pic"><div class="shot" data-hint="Photo to add: the finished capacitor (save as capacitor.jpg)"><img src="capacitor.jpg" alt="Variable capacitor" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></div></div>
+<section class="section"><h2>The brief</h2><div class="prose"><p>Design and build a capacitor whose value can be adjusted across a set range, then show that the measured values match what you designed for. Making something that changes capacitance is the easy part. <strong>Making it read accurately across the whole range</strong> is where most attempts fall short.</p></div></section>
+<section class="section"><h2>The approach</h2><div class="prose"><p>A capacitor's value depends on how much the plates overlap, the gap between them and the material in between. I worked out the expected capacitance at points across the range, built the device, measured it, and adjusted until the measured values lined up with the calculated ones.</p>
+<div class="shots"><div class="shot empty" data-hint="Photo to add: plates and adjustment"></div><div class="shot empty" data-hint="Photo to add: meter readings"></div></div></div></section>
+<section class="section"><h2>Results</h2><div class="prose"><table class="results">
 <tr><td>Range achieved</td><td>2 nF to 40 nF</td></tr>
 <tr><td>Measured accuracy</td><td><strong>± 2 nF</strong></td></tr>
 <tr><td>Assessment</td><td>Highest marks</td></tr>
 </table></div></section>
-<section class="block"><h2>What I took away</h2><div class="prose"><p>The formula tells you what the value should be. The meter tells you what it is. Most of the work was closing the gap between the two.</p></div></section>
-<section class="block"><nav class="next-proj" aria-label="More projects"><a href="solar-watering.html"><span>Previous</span>Solar watering retrofit</a><a href="holographic.html" style="text-align:right"><span>Next</span>Holographic email notifier</a></nav></section>
+<section class="section"><h2>What I took away</h2><div class="prose"><p>The formula tells you what the value should be. The meter tells you what it is. Most of the work was closing the gap between the two.</p></div></section>
+<section class="section"><nav class="pager" aria-label="More work"><a href="solar-watering.html"><small>Previous</small>Solar watering retrofit</a><a href="holographic.html" style="text-align:right"><small>Next</small>Holographic email notifier</a></nav></section>
 </main>
-<footer>
-  <span>Sanjith Bangalore Kumaraswamy, Singapore</span>
-  <span>Last updated November 2026</span>
+<footer class="dark" id="contact">
+  <div class="wrap contact">
+    <h2>Get in touch</h2>
+    <p>Open to internships from September 2027, in consulting, operations or engineering. Happy to talk wherever you're based.</p>
+    <ul>
+      <li><a href="mailto:bksanjith@gmail.com">bksanjith@gmail.com</a></li>
+      <li><a href="https://www.linkedin.com/in/sanjith-bangalore-kumaraswamy-878bab113/" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="tel:+6581634076">+65 8163 4076</a></li>
+    </ul>
+  </div>
+  <div class="wrap foot"><span>Sanjith Bangalore Kumaraswamy</span><span>Based in Singapore, working across borders</span></div>
 </footer>
 </body>
 </html>
