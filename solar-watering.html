@@ -3,104 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solar Drip Watering Retrofit | Sanjith B. Kumaraswamy</title>
+  <title>Solar watering retrofit | Sanjith B.K.</title>
+  <meta name="description" content="Converted a battery-powered drip watering unit to solar, in a 3D-printed rainproof case that hangs from a branch.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">SANJITH.B.K</a>
-    <ul class="nav-links">
-      <li><a href="index.html#experience">Experience</a></li>
-      <li><a href="index.html#projects">Work</a></li>
-      <li><a href="index.html#contact">Contact</a></li>
-    </ul>
-  </div>
+<nav class="nav" aria-label="Main">
+  <a class="nav-name" href="index.html">Sanjith B.K.</a>
+  <ul>
+    <li><a href="index.html#experience">Experience</a></li>
+    <li><a href="index.html#work">Work</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
 </nav>
-
-<main>
-
-<section class="project-hero">
-  <div class="container">
-    <a href="index.html#projects" class="back-link">Back to Projects</a>
-    <div class="hero-meta">PERSONAL PROJECT</div>
-    <h1>Solar drip watering retrofit</h1>
-    <p class="project-tagline">Converting an off-the-shelf drip watering unit from a battery that needed regular charging to a self-powered solar device that hangs from a tree branch.</p>
-
-    <div class="img-placeholder wide" style="margin-top: 2rem;">
-      <span>HERO IMAGE / 1600 × 900</span>
-      <span style="font-size: 0.7rem;">Finished device with panel canopy</span>
-    </div>
-
-    <div class="project-meta">
-      <div class="meta-item">
-        <div class="meta-label">Type</div>
-        <div class="meta-value">Retrofit</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Panel</div>
-        <div class="meta-value">6 V, 1 W</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Enclosure</div>
-        <div class="meta-value">3D-printed PLA</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Status</div>
-        <div class="meta-value">Built and working</div>
-      </div>
+<header class="board small">
+  <div class="inner">
+    <a class="back" href="index.html#work">Back to all work</a>
+    <div class="label">
+      <div class="tape" aria-hidden="true"></div>
+      <div class="row"><div class="cell title-cell">
+        <span class="field">Personal</span>
+        <h1>Solar watering retrofit</h1>
+      </div></div>
+      <div class="row specs"><div class="cell"><span class="field">Type</span><span class="val">Retrofit</span></div><div class="cell"><span class="field">Panel</span><span class="val">6 V, 1 W</span></div><div class="cell"><span class="field">Enclosure</span><span class="val">Printed PLA</span></div><div class="cell"><span class="field">Status</span><span class="val">Working</span></div></div>
     </div>
   </div>
-</section>
-
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ The Problem</div>
-    <div class="project-section-body">
-      <p>I bought an automatic drip watering system online. It ran on a 3.7 V battery that lasted up to two months between charges, which meant someone had to remember to take it down and charge it. I wanted it to look after itself.</p>
-    </div>
-  </div>
-</section>
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ The Build</div>
-    <div class="project-section-body">
-      <ul>
-        <li><strong>Power:</strong> 6 V 1 W solar panel feeding a PWM charge controller and a rechargeable lithium cell</li>
-        <li><strong>Load:</strong> the pump draws about 1.27 A at 3.7 V, for 60 seconds, five times a day</li>
-        <li><strong>Enclosure:</strong> designed in Fusion 360 and printed in PLA, with the panel as an overhanging canopy so rain runs off and the display and buttons stay usable</li>
-        <li><strong>Mounting:</strong> designed to hang from a branch, with the pipe exits on the underside</li>
-      </ul>
-      <div class="img-row">
-<div class="img-placeholder square">
-      <span>CAD</span>
-      <span style="font-size: 0.7rem;">Enclosure model in Fusion 360</span>
-    </div>
-<div class="img-placeholder square">
-      <span>BUILD PHOTO</span>
-      <span style="font-size: 0.7rem;">Device installed outdoors</span>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ What Went Wrong</div>
-    <div class="project-section-body">
-      <p>My first battery choice, a small 400 mAh cell, cut out as soon as the pump started. The pump pulls about 1.27 A, roughly three times the cell's rated capacity (around 3C), and the cell simply couldn't supply current that fast. The motor tested fine on its own, so the fault was the power source, not the pump.</p>
-      <p>Lesson: <strong>size the battery for peak current, not just for total energy</strong>. A cell can hold enough charge for the day and still be unable to deliver it fast enough.</p>
-    </div>
-  </div>
-</section>
-
+</header>
+<main class="page case">
+<div class="shot">Photo to add: the finished device on a branch</div>
+<section class="block"><h2>The problem</h2><div class="prose"><p>I bought an automatic drip watering system online. It ran on a 3.7 V battery that lasted up to two months between charges, so someone had to remember to take it down and charge it. I wanted it to look after itself.</p></div></section>
+<section class="block"><h2>The build</h2><div class="prose"><ul class="plain">
+<li><strong>Power:</strong> 6 V 1 W solar panel feeding a PWM charge controller and a rechargeable lithium cell</li>
+<li><strong>Load:</strong> the pump draws about 1.27 A at 3.7 V, for 60 seconds, five times a day</li>
+<li><strong>Enclosure:</strong> designed in Fusion 360 and printed in PLA, with the panel as an overhanging canopy so rain runs off and the display and buttons stay usable</li>
+<li><strong>Mounting:</strong> hangs from a branch, with the pipe exits on the underside</li>
+</ul>
+<div class="shots"><div class="shot sq">Image to add: enclosure in Fusion 360</div><div class="shot sq">Photo to add: installed outdoors</div></div></div></section>
+<section class="block"><h2>What went wrong</h2><div class="prose"><p>My first battery, a small 400 mAh cell, cut out as soon as the pump started. The pump pulls about 1.27 A, roughly three times the cell's rated capacity, and the cell couldn't supply current that fast. The motor tested fine on its own, so the fault was the power source.</p>
+<p>Lesson: <strong>size a battery for peak current, not just total energy.</strong> A cell can hold enough charge for the day and still be unable to deliver it fast enough.</p></div></section>
+<section class="block"><nav class="next-proj" aria-label="More projects"><a href="solar-dryer.html"><span>Previous</span>Solar food dryer</a><a href="capacitor.html" style="text-align:right"><span>Next</span>Variable capacitor</a></nav></section>
 </main>
-
 <footer>
-  <div>© 2026 SANJITH B. KUMARASWAMY</div>
-  <div><a href="index.html" style="color: var(--text-dim); text-decoration: none;">← BACK TO HOME</a></div>
+  <span>Sanjith Bangalore Kumaraswamy, Singapore</span>
+  <span>Last updated November 2026</span>
 </footer>
-
 </body>
 </html>

@@ -3,120 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solar Food Dryer | Sanjith B. Kumaraswamy</title>
+  <title>Solar food dryer | Sanjith B.K.</title>
+  <meta name="description" content="A low-cost drying box with an exhaust fan that only runs when the air inside is humid enough to be worth moving.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">SANJITH.B.K</a>
-    <ul class="nav-links">
-      <li><a href="index.html#experience">Experience</a></li>
-      <li><a href="index.html#projects">Work</a></li>
-      <li><a href="index.html#contact">Contact</a></li>
-    </ul>
-  </div>
+<nav class="nav" aria-label="Main">
+  <a class="nav-name" href="index.html">Sanjith B.K.</a>
+  <ul>
+    <li><a href="index.html#experience">Experience</a></li>
+    <li><a href="index.html#work">Work</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
 </nav>
-
-<main>
-
-<section class="project-hero">
-  <div class="container">
-    <a href="index.html#projects" class="back-link">Back to Projects</a>
-    <div class="hero-meta">COURSEWORK / DESIGN THINKING PROJECT III / TEAM</div>
-    <h1>Solar food dryer with humidity control</h1>
-    <p class="project-tagline">A low-cost, solar-heated drying box built under a $100 group budget, with an exhaust fan that only runs when the air inside is humid enough to be worth moving.</p>
-
-    <div class="img-placeholder wide" style="margin-top: 2rem;">
-      <span>HERO IMAGE / 1600 × 900</span>
-      <span style="font-size: 0.7rem;">Finished dryer outdoors during testing</span>
-    </div>
-
-    <div class="project-meta">
-      <div class="meta-item">
-        <div class="meta-label">My role</div>
-        <div class="meta-value">Prototyping and electronics</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Budget</div>
-        <div class="meta-value">$100 (group)</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Controller</div>
-        <div class="meta-value">ESP32-S3</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Mean result</div>
-        <div class="meta-value">8.52 g / 40 min</div>
-      </div>
+<header class="board small">
+  <div class="inner">
+    <a class="back" href="index.html#work">Back to all work</a>
+    <div class="label">
+      <div class="tape" aria-hidden="true"></div>
+      <div class="row"><div class="cell title-cell">
+        <span class="field">SUTD coursework, team of four</span>
+        <h1>Solar food dryer</h1>
+      </div></div>
+      <div class="row specs"><div class="cell"><span class="field">My role</span><span class="val">Prototyping, electronics</span></div><div class="cell"><span class="field">Budget</span><span class="val">$100 for the group</span></div><div class="cell"><span class="field">Controller</span><span class="val">ESP32-S3</span></div><div class="cell"><span class="field">Mean result</span><span class="val">8.52 g in 40 min</span></div></div>
     </div>
   </div>
-</section>
-
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ The Brief</div>
-    <div class="project-section-body">
-      <p>SUTD's Design Thinking Project III ties together Designing Energy Systems and Modelling Uncertainty. The task was a solar-powered food drying device, tested outdoors between 9am and 11am, judged on grams of water removed from a wet sponge.</p>
-      <ul>
-        <li>$100 budget for the group</li>
-        <li>Prototype no larger than 75 × 75 cm</li>
-        <li>Target: at least 4.0 g of water removed in 30 minutes</li>
-      </ul>
-    </div>
-  </div>
-</section>
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ The Build</div>
-    <div class="project-section-body">
-      <p>The enclosure is a styrofoam box used as a frame, with acrylic windows on the two long sides and the top to let sunlight in while keeping heat trapped. The internal chamber is 36.5 × 19.0 × 17.0 cm.</p>
-      <p>I handled the prototyping and electronics. Instead of running the fan nonstop, an ESP32-S3 reads humidity inside the box and switches the exhaust fan <strong>on at 50% relative humidity and off at 35%</strong>. The gap between the two stops the fan flickering on and off. The firmware also logs every reading to CSV so we could analyse each run afterwards.</p>
-      <p>We ruled out mirrors to concentrate sunlight because of the risk of scorching the sample.</p>
-      <div class="img-row">
-<div class="img-placeholder square">
-      <span>BUILD PHOTO</span>
-      <span style="font-size: 0.7rem;">Enclosure and acrylic windows</span>
-    </div>
-<div class="img-placeholder square">
-      <span>ELECTRONICS</span>
-      <span style="font-size: 0.7rem;">ESP32-S3, fan and sensor wiring</span>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ Results</div>
-    <div class="project-section-body">
-      <table class="spec-table">
-        <tr><td>Original design</td><td>4.2 g in 30 min</td></tr>
-        <tr><td>Modified design</td><td>7.1 g in 30 min, 13.4 g in 60 min</td></tr>
-        <tr><td>Five repeat trials (40 min)</td><td>Mean <strong style="color: var(--accent);">8.52 g</strong>, 95% CI 7.87 to 9.17 g</td></tr>
-        <tr><td>Specification</td><td>At least 4.0 g in 30 min</td></tr>
-        <tr><td>Solar availability</td><td>94.8% (Wilson lower bound 92.5% vs 90% target)</td></tr>
-      </table>
-      <p style="margin-top: 1.5rem;">The modified design comfortably beat the specification across every repeat, and the confidence interval sits well clear of the target rate.</p>
-    </div>
-  </div>
-</section>
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ What I Took Away</div>
-    <div class="project-section-body">
-      <p>Repeating trials and putting a confidence interval on the result changed how we talked about the design. "It works" became "it works this well, this reliably", which is a far more useful claim to make to anyone deciding whether to use it.</p>
-    </div>
-  </div>
-</section>
-
+</header>
+<main class="page case">
+<div class="shot">Photo to add: the dryer outdoors during testing</div>
+<section class="block"><h2>The brief</h2><div class="prose"><p>Design Thinking Project III ties together Designing Energy Systems and Modelling Uncertainty. The task was a solar-powered food drying device, tested outdoors between 9am and 11am and judged on grams of water removed from a wet sponge.</p>
+<ul class="plain"><li>$100 budget for the group</li><li>No larger than 75 × 75 cm</li><li>Target: at least 4.0 g of water removed in 30 minutes</li></ul></div></section>
+<section class="block"><h2>The build</h2><div class="prose"><p>The enclosure is a styrofoam box used as a frame, with acrylic windows on the two long sides and the top to let light in and keep heat trapped. The internal chamber is 36.5 × 19.0 × 17.0 cm.</p>
+<p>I did the prototyping and electronics. Instead of running the fan nonstop, an ESP32-S3 reads humidity inside the box and switches the exhaust fan <strong>on at 50% and off at 35%</strong> relative humidity. The gap between the two stops the fan flickering on and off. The firmware also logs every reading to CSV so we could analyse each run afterwards.</p>
+<p>We ruled out mirrors to concentrate sunlight because of the risk of scorching the sample.</p>
+<div class="shots"><div class="shot sq">Photo to add: enclosure and windows</div><div class="shot sq">Photo to add: ESP32-S3 and fan wiring</div></div></div></section>
+<section class="block"><h2>Results</h2><div class="prose"><table class="results">
+<tr><td>Original design</td><td>4.2 g in 30 min</td></tr>
+<tr><td>Modified design</td><td>7.1 g in 30 min, 13.4 g in 60 min</td></tr>
+<tr><td>Five repeat trials, 40 min each</td><td>Mean <strong>8.52 g</strong>, 95% CI 7.87 to 9.17 g</td></tr>
+<tr><td>Specification</td><td>At least 4.0 g in 30 min</td></tr>
+<tr><td>Solar availability</td><td>94.8%, Wilson lower bound 92.5% against a 90% target</td></tr>
+</table></div></section>
+<section class="block"><h2>What I took away</h2><div class="prose"><p>Repeating trials and putting a confidence interval on the result changed how we talked about the design. "It works" became "it works this well, this reliably", which is a far more useful thing to tell someone deciding whether to use it.</p></div></section>
+<section class="block"><nav class="next-proj" aria-label="More projects"><a href="swiftpack.html"><span>Previous</span>SwiftPack</a><a href="solar-watering.html" style="text-align:right"><span>Next</span>Solar watering retrofit</a></nav></section>
 </main>
-
 <footer>
-  <div>© 2026 SANJITH B. KUMARASWAMY</div>
-  <div><a href="index.html" style="color: var(--text-dim); text-decoration: none;">← BACK TO HOME</a></div>
+  <span>Sanjith Bangalore Kumaraswamy, Singapore</span>
+  <span>Last updated November 2026</span>
 </footer>
-
 </body>
 </html>

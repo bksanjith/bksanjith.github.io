@@ -3,100 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Holographic Email Notifier | Sanjith B. Kumaraswamy</title>
+  <title>Holographic email notifier | Sanjith B.K.</title>
+  <meta name="description" content="An ambient clock that shows priority email alerts as a floating image, using the Pepper's Ghost effect.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">SANJITH.B.K</a>
-    <ul class="nav-links">
-      <li><a href="index.html#experience">Experience</a></li>
-      <li><a href="index.html#projects">Work</a></li>
-      <li><a href="index.html#contact">Contact</a></li>
-    </ul>
-  </div>
+<nav class="nav" aria-label="Main">
+  <a class="nav-name" href="index.html">Sanjith B.K.</a>
+  <ul>
+    <li><a href="index.html#experience">Experience</a></li>
+    <li><a href="index.html#work">Work</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
 </nav>
-
-<main>
-
-<section class="project-hero">
-  <div class="container">
-    <a href="index.html#projects" class="back-link">Back to Projects</a>
-    <div class="hero-meta">COURSEWORK / TEAM / SUTD</div>
-    <h1>Holographic email notifier</h1>
-    <p class="project-tagline">An ambient home clock that shows priority email alerts as a floating image, so you know when something urgent arrives without picking up your phone.</p>
-
-    <div class="img-placeholder wide" style="margin-top: 2rem;"><img src="image.png" alt="Holographic email notifier"></div>
-
-    <div class="project-meta">
-      <div class="meta-item">
-        <div class="meta-label">Role</div>
-        <div class="meta-value">Team member</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Hardware</div>
-        <div class="meta-value">Raspberry Pi 4</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Optics</div>
-        <div class="meta-value">Pepper's Ghost, 35°</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Software</div>
-        <div class="meta-value">Python</div>
-      </div>
+<header class="board small">
+  <div class="inner">
+    <a class="back" href="index.html#work">Back to all work</a>
+    <div class="label">
+      <div class="tape" aria-hidden="true"></div>
+      <div class="row"><div class="cell title-cell">
+        <span class="field">SUTD coursework, team</span>
+        <h1>Holographic email notifier</h1>
+      </div></div>
+      <div class="row specs"><div class="cell"><span class="field">Role</span><span class="val">Team member</span></div><div class="cell"><span class="field">Hardware</span><span class="val">Raspberry Pi 4</span></div><div class="cell"><span class="field">Optics</span><span class="val">Pepper's Ghost, 35°</span></div><div class="cell"><span class="field">Software</span><span class="val">Python</span></div></div>
     </div>
   </div>
-</section>
-
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ The Problem</div>
-    <div class="project-section-body">
-      <p>At home, you either keep your phone close and get pulled into every notification, or put it away and risk missing something urgent. We wanted a way to surface only the emails that matter, without a screen demanding attention.</p>
-    </div>
-  </div>
-</section>
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ The Approach</div>
-    <div class="project-section-body">
-      <p>We used the <strong>Pepper's Ghost effect</strong>, an old stage illusion where an angled transparent surface reflects a screen below it so the image appears to float. Most of the time the device just shows a clock. When a priority email arrives, an alert appears in the same floating display.</p>
-      <ul>
-        <li><strong>Display:</strong> a small screen facing up into a transparent surface set at 35°</li>
-        <li><strong>Compute:</strong> Raspberry Pi 4 (4 GB) running Python</li>
-        <li><strong>Email:</strong> pulled in and filtered so only priority messages trigger an alert</li>
-      </ul>
-      <div class="img-row">
-<div class="img-placeholder square">
-      <span>DIAGRAM</span>
-      <span style="font-size: 0.7rem;">How the Pepper's Ghost setup works</span>
-    </div>
-<div class="img-placeholder square">
-      <span>BUILD PHOTO</span>
-      <span style="font-size: 0.7rem;">Internals</span>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
-<section class="project-section">
-  <div class="project-section-inner">
-    <div class="project-section-label">/ Testing</div>
-    <div class="project-section-body">
-      <p>We settled on the 35° angle through testing, balancing how clearly the image floats against how compact and stable the device sits on a shelf. We also tested how readable alerts were at a glance from across a room.</p>
-    </div>
-  </div>
-</section>
-
+</header>
+<main class="page case">
+<div class="shot"><img src="image.png" alt="Holographic email notifier"></div>
+<section class="block"><h2>The problem</h2><div class="prose"><p>At home you either keep your phone close and get pulled into every notification, or put it away and risk missing something urgent. We wanted a way to surface only the emails that matter, without a screen demanding attention.</p></div></section>
+<section class="block"><h2>The approach</h2><div class="prose"><p>We used the <strong>Pepper's Ghost effect</strong>, an old stage illusion where an angled transparent surface reflects a screen below it so the image seems to float. Most of the time the device shows a clock. When a priority email arrives, an alert appears in the same floating display.</p>
+<ul class="plain">
+<li><strong>Display:</strong> a small screen facing up into a transparent surface set at 35°</li>
+<li><strong>Compute:</strong> Raspberry Pi 4 (4 GB) running Python</li>
+<li><strong>Email:</strong> filtered so only priority messages trigger an alert</li>
+</ul>
+<div class="shots"><div class="shot sq">Diagram to add: how the reflection works</div><div class="shot sq">Photo to add: internals</div></div></div></section>
+<section class="block"><h2>Testing</h2><div class="prose"><p>We settled on 35° through testing, balancing how clearly the image floats against how compact and stable the device sits on a shelf. We also checked how readable alerts were at a glance from across a room.</p></div></section>
+<section class="block"><nav class="next-proj" aria-label="More projects"><a href="capacitor.html"><span>Previous</span>Variable capacitor</a><a href="rubberband-car.html" style="text-align:right"><span>Next</span>Rubber band car</a></nav></section>
 </main>
-
 <footer>
-  <div>© 2026 SANJITH B. KUMARASWAMY</div>
-  <div><a href="index.html" style="color: var(--text-dim); text-decoration: none;">← BACK TO HOME</a></div>
+  <span>Sanjith Bangalore Kumaraswamy, Singapore</span>
+  <span>Last updated November 2026</span>
 </footer>
-
 </body>
 </html>
