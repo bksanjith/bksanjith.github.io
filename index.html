@@ -10,6 +10,16 @@
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
+<section id="walk" aria-label="Walk through my house: a drawn tour of my work">
+  <div id="stage">
+    <svg id="world" role="img" aria-label="Line drawing of a house. A drawn version of me walks from the garage to the office, hallway, a construction site and a fragrance lab."></svg>
+    <div class="w-top"><a class="w-name" href="index.html">Sanjith B.K.</a><nav aria-label="Main"><a href="projects.html">Projects</a><a href="contact.html">Contact</a><a href="#about">Skip the tour</a></nav></div>
+    <div id="walk-hero"><h1>Sanjith Bangalore Kumaraswamy</h1><p>I study engineering at SUTD, have been developing Fragrance Castle since 2019, and spent two years training police officers. Outside of that, I play football and golf, tinker with my old Toyota, and travel when I can. This site brings it all together.</p><p class="w-hint">Scroll to walk through</p></div>
+    <div id="cards"></div>
+    <div class="w-bar"><span id="walk-bar"></span></div>
+  </div>
+  <noscript><p class="w-noscript">Turn on JavaScript to see the drawn tour, or <a href="#about">read on</a>.</p></noscript>
+</section>
 <div class="shell">
   <header class="side">
     <a class="name" href="index.html"><span class="full">Sanjith<br>Bangalore<br>Kumaraswamy</span><span class="short">Sanjith B.K.</span></a>
@@ -19,10 +29,7 @@
   <main class="main" id="main">
     <div class="col">
 
-      <h1 class="sr-only">Sanjith Bangalore Kumaraswamy</h1>
-      <p class="statement">I study engineering at SUTD, have been developing Fragrance Castle since 2019, and spent two years training police officers. Outside of that, I play football and golf, tinker with my old Toyota, and travel when I can. This site brings it all together.</p>
-
-      <section class="band" aria-labelledby="about-h">
+      <section class="band first" id="about" aria-labelledby="about-h">
         <h2 id="about-h">About</h2>
         <div class="about">
           <div class="prose">
@@ -50,7 +57,7 @@
       <section class="band" aria-labelledby="proj-h">
         <h2 id="proj-h">Projects</h2>
         <p class="sub">Open a group to see the projects in it.</p>
-        <div class="cats"><a href="projects.html#professional"><span class="n">Professional</span><span class="c">2 projects</span></a><a href="projects.html#development"><span class="n">Personal development</span><span class="c">4 projects</span></a><a href="projects.html#interest"><span class="n">Personal interest</span><span class="c">1 project</span></a></div>
+        <div class="cats"><a href="projects.html#professional"><span class="n">Professional</span><span class="c">2 projects</span></a><a href="projects.html#development"><span class="n">Personal development</span><span class="c">4 projects</span></a><a href="projects.html#interest"><span class="n">Personal interest</span><span class="c">2 projects</span></a></div>
       </section>
 
       <section class="band" aria-labelledby="out-h">
@@ -67,5 +74,7 @@
     </div>
   </main>
 </div>
+<script src="map.js"></script>
+<script src="scene.js"></script>
 </body>
 </html>

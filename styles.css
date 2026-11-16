@@ -13,7 +13,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   background: var(--ink);
@@ -210,3 +210,40 @@ table.results tr:last-child td { border-bottom: 1px solid var(--rule); }
   .side nav a { font-size: 0.92rem; }
   .name { font-size: 1.15rem; }
 }
+
+/* drawn walk-through */
+#walk { position: relative; }
+#stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--ink); }
+#world { position: absolute; inset: 0; display: block; }
+#world .d { stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--r, 0)); stroke-linecap: round; stroke-linejoin: round; }
+#world .t { font-family: var(--sans); opacity: var(--r, 0); }
+#mapz .t, #fx .t, #engbay .t { opacity: 1; }
+.w-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 1.4rem clamp(1.25rem, 4vw, 3rem); z-index: 3; }
+.w-name { font: 400 1.4rem/1 var(--serif); color: var(--stone); text-decoration: none; }
+.w-top nav { display: flex; gap: 1.5rem; }
+.w-top nav a { color: var(--muted); text-decoration: none; font-weight: 500; }
+.w-top nav a:hover { color: var(--stone); }
+#walk-hero { position: absolute; left: clamp(1.25rem, 4vw, 3rem); top: 6rem; max-width: 34rem; z-index: 2; pointer-events: none; }
+#walk-hero h1 { font: 400 clamp(2rem, 4vw, 3.2rem)/1.05 var(--serif); color: var(--stone); margin-bottom: 1rem; }
+#walk-hero p { font: 400 clamp(1.05rem, 1.6vw, 1.25rem)/1.45 var(--serif); color: var(--sand); background: rgba(35,33,29,0.82); }
+#walk-hero .w-hint { margin-top: 1.25rem; font: 500 0.95rem/1 var(--sans); color: var(--muted); background: none; }
+.wcard { position: absolute; width: 340px; padding: 1rem 1.15rem 0.95rem; background: var(--ink); border: 1.5px solid var(--stone); z-index: 4; opacity: 0; transform: translateY(8px); transition: opacity .35s ease, transform .35s ease; pointer-events: none; }
+.wcard.on { opacity: 1; transform: none; pointer-events: auto; }
+.wcard::after { content: ''; position: absolute; left: 50%; bottom: -9px; width: 14px; height: 14px; background: var(--ink); border-right: 1.5px solid var(--stone); border-bottom: 1.5px solid var(--stone); transform: translateX(-50%) rotate(45deg); }
+.wc-t { font: 400 1.25rem/1.2 var(--serif); color: var(--stone); margin-bottom: 0.35rem; }
+.wc-b { font-size: 0.95rem; line-height: 1.5; color: var(--sand); }
+.wcard a { display: inline-block; margin-top: 0.6rem; font-size: 0.92rem; font-weight: 500; color: var(--stone); }
+.w-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--rule); z-index: 3; }
+.w-bar span { display: block; height: 100%; background: var(--sand); transform-origin: 0 50%; transform: scaleX(0); }
+.w-noscript { padding: 2rem; }
+.band.first { margin-top: 0; padding-top: 0; border-top: 0; }
+@media (max-width: 760px) {
+  .w-top nav { gap: 1rem; } .w-top nav a { font-size: 0.92rem; }
+  .w-top nav a:last-child { display: none; }
+  #walk-hero { top: 4.5rem; right: 1.25rem; }
+  .wcard { width: auto; left: 1rem !important; right: 1rem; transform: translateY(8px); }
+  .wcard.on { transform: none; }
+  .wcard::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .wcard { transition: none; } }
+#about { scroll-margin-top: 3rem; }
