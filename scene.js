@@ -2,797 +2,592 @@
   'use strict';
   var svg = document.getElementById('world');
   if (!svg) return;
-  var stage = document.getElementById('stage');
-  var walk = document.getElementById('walk');
-  var cardsEl = document.getElementById('cards');
-  var heroEl = document.getElementById('walk-hero');
-  var barEl = document.getElementById('walk-bar');
+  var stage = document.getElementById('stage'), walk = document.getElementById('walk');
+  var cardsEl = document.getElementById('cards'), heroEl = document.getElementById('walk-hero'), barEl = document.getElementById('walk-bar');
+  var TR = window.TR || {};
 
   var LN = '#CDBFA8', HI = '#E6E2DA', FAR = '#8a7f6e', INK = '#23211D', SOFT = '#2C2924';
   var FY = 700, CY = 380, EYE = 560, F = 700, D = 520;
 
-  // ---------- drawing helpers ----------
+  // ---------- helpers ----------
   function f(n) { return Math.round(n * 10) / 10; }
-  function P(d, w, c, x) {
-    return '<path class="d" pathLength="1" d="' + d + '" stroke="' + (c || LN) + '" stroke-width="' + (w || 1.4) + '" fill="none"' + (x || '') + '/>';
-  }
-  function PF(d, w, c, fill) {
-    return '<path class="d" pathLength="1" d="' + d + '" stroke="' + (c || LN) + '" stroke-width="' + (w || 1.4) + '" fill="' + (fill || INK) + '"/>';
-  }
-  function T(x, y, s, txt, c, anchor, weight) {
-    return '<text class="t" x="' + f(x) + '" y="' + f(y) + '" font-size="' + s + '" fill="' + (c || LN) + '" text-anchor="' + (anchor || 'start') + '"' + (weight ? ' font-weight="' + weight + '"' : '') + '>' + txt + '</text>';
-  }
-  function proj(vx) {
-    return function (x, y, z) { var s = F / (F + z); return [vx + (x - vx) * s, EYE + (y - EYE) * s]; };
-  }
+  function P(d, w, c, x) { return '<path class="d" pathLength="1" d="' + d + '" stroke="' + (c || LN) + '" stroke-width="' + (w || 1.4) + '" fill="none"' + (x || '') + '/>'; }
+  function PF(d, w, c, fill) { return '<path class="d" pathLength="1" d="' + d + '" stroke="' + (c || LN) + '" stroke-width="' + (w || 1.4) + '" fill="' + (fill || INK) + '"/>'; }
+  function T(x, y, s, txt, c, anchor, weight) { return '<text class="t" x="' + f(x) + '" y="' + f(y) + '" font-size="' + s + '" fill="' + (c || LN) + '" text-anchor="' + (anchor || 'start') + '"' + (weight ? ' font-weight="' + weight + '"' : '') + '>' + txt + '</text>'; }
+  function proj(vx) { return function (x, y, z) { var s = F / (F + z); return [vx + (x - vx) * s, EYE + (y - EYE) * s]; }; }
   function seg(pr, a, b) { var p = pr(a[0], a[1], a[2]), q = pr(b[0], b[1], b[2]); return 'M' + f(p[0]) + ' ' + f(p[1]) + 'L' + f(q[0]) + ' ' + f(q[1]); }
-  function poly(pr, pts, close) {
-    return pts.map(function (p, i) { var q = pr(p[0], p[1], p[2]); return (i ? 'L' : 'M') + f(q[0]) + ' ' + f(q[1]); }).join('') + (close ? 'Z' : '');
-  }
-  function box(pr, vx, x0, x1, y0, y1, z0, z1, w, c, fill) {
-    var c8 = {};
-    [[x0, 'a'], [x1, 'b']].forEach(function (X) { [[y0, 't'], [y1, 'u']].forEach(function (Y) { [[z0, 'f'], [z1, 'k']].forEach(function (Z) { c8[X[1] + Y[1] + Z[1]] = [X[0], Y[0], Z[0]]; }); }); });
-    var out = '';
-    var faces = [];
+  function poly(pr, pts, close) { return pts.map(function (p, i) { var q = pr(p[0], p[1], p[2]); return (i ? 'L' : 'M') + f(q[0]) + ' ' + f(q[1]); }).join('') + (close ? 'Z' : ''); }
+  function box(pr, vx, x0, x1, y0, y1, z0, z1, w, c) {
+    var k = {};
+    [[x0, 'a'], [x1, 'b']].forEach(function (X) { [[y0, 't'], [y1, 'u']].forEach(function (Y) { [[z0, 'f'], [z1, 'k']].forEach(function (Z) { k[X[1] + Y[1] + Z[1]] = [X[0], Y[0], Z[0]]; }); }); });
+    var out = '', faces = [];
     if (EYE < y0) faces.push(['atf', 'btf', 'btk', 'atk']);
     if (EYE > y1) faces.push(['auf', 'buf', 'buk', 'auk']);
     if (vx < x0) faces.push(['atf', 'auf', 'auk', 'atk']);
     if (vx > x1) faces.push(['btf', 'buf', 'buk', 'btk']);
-    faces.forEach(function (fc) { out += PF(poly(pr, fc.map(function (k) { return c8[k]; }), true), (w || 1.4) * 0.6, c || LN, fill || INK); });
-    out += PF(poly(pr, [c8.atf, c8.btf, c8.buf, c8.auf], true), w || 1.4, c || LN, fill || INK);
-    return out;
+    faces.forEach(function (fc) { out += PF(poly(pr, fc.map(function (q) { return k[q]; }), true), (w || 1.4) * 0.6, c || LN); });
+    return out + PF(poly(pr, [k.atf, k.btf, k.buf, k.auf], true), w || 1.4, c || LN);
   }
+  function cp(cx, cy, r) { return 'M' + f(cx - r) + ' ' + f(cy) + 'a' + r + ' ' + r + ' 0 1 0 ' + f(2 * r) + ' 0a' + r + ' ' + r + ' 0 1 0 ' + f(-2 * r) + ' 0'; }
+  function ep(cx, cy, rx, ry) { return 'M' + f(cx - rx) + ' ' + f(cy) + 'a' + rx + ' ' + ry + ' 0 1 0 ' + f(2 * rx) + ' 0a' + rx + ' ' + ry + ' 0 1 0 ' + f(-2 * rx) + ' 0'; }
   function room(vx, x0, x1, opt) {
     opt = opt || {};
-    var pr = proj(vx), s = '';
-    var bl = pr(x0, CY, D), br = pr(x1, CY, D), bl2 = pr(x0, FY, D), br2 = pr(x1, FY, D);
-    s += P(poly(pr, [[x0, CY, D], [x1, CY, D], [x1, FY, D], [x0, FY, D]], true), 1.1, LN);
-    s += P(seg(pr, [x0, CY, 0], [x0, CY, D]) + seg(pr, [x1, CY, 0], [x1, CY, D]) + seg(pr, [x0, FY, 0], [x0, FY, D]) + seg(pr, [x1, FY, 0], [x1, FY, D]), 1.1, LN);
-    var n = opt.boards || 0, i;
-    for (i = 1; i < n; i++) { var xx = x0 + (x1 - x0) * i / n; s += P(seg(pr, [xx, FY, 0], [xx, FY, D]), 0.5, FAR); }
-    if (opt.tiles) { for (i = 1; i < 5; i++) { var z = D * Math.pow(i / 5, 1.3); s += P(seg(pr, [x0, FY, z], [x1, FY, z]), 0.5, FAR); } }
-    // section cut at the front
-    s += PF('M' + (x0 - 14) + ' ' + (CY - 14) + 'H' + (x1 + 14) + 'V' + CY + 'H' + x0 + 'V' + FY + 'H' + (x0 - 14) + 'Z', 2.6, LN, SOFT);
-    s += PF('M' + (x1 + 14) + ' ' + CY + 'V' + FY + 'H' + x1 + 'V' + CY + 'Z', 2.6, LN, SOFT);
+    var dd = opt.depth || D, pr = function (x, y, z) { var s = F / (F + z); return [vx + (x - vx) * s, EYE + (y - EYE) * s]; }, s = '', i;
+    s += P(poly(pr, [[x0, CY, dd], [x1, CY, dd], [x1, FY, dd], [x0, FY, dd]], true), 1.1);
+    s += P(seg(pr, [x0, CY, 0], [x0, CY, dd]) + seg(pr, [x1, CY, 0], [x1, CY, dd]) + seg(pr, [x0, FY, 0], [x0, FY, dd]) + seg(pr, [x1, FY, 0], [x1, FY, dd]), 1.1);
+    for (i = 1; i < (opt.boards || 0); i++) { var xx = x0 + (x1 - x0) * i / opt.boards; s += P(seg(pr, [xx, FY, 0], [xx, FY, dd]), 0.5, FAR); }
+    if (opt.tiles) for (i = 1; i < 5; i++) { var z = dd * Math.pow(i / 5, 1.3); s += P(seg(pr, [x0, FY, z], [x1, FY, z]), 0.5, FAR); }
+    var lb = opt.doorL ? FY - 250 : FY, rb = opt.doorR ? FY - 250 : FY;
+    s += PF('M' + (x0 - 14) + ' ' + (CY - 14) + 'H' + (x1 + 14) + 'V' + CY + 'H' + (x0 - 14) + 'Z', 2.6, LN, SOFT);
+    s += PF('M' + (x0 - 14) + ' ' + CY + 'H' + x0 + 'V' + lb + 'H' + (x0 - 14) + 'Z', 2.6, LN, SOFT);
+    s += PF('M' + x1 + ' ' + CY + 'H' + (x1 + 14) + 'V' + rb + 'H' + x1 + 'Z', 2.6, LN, SOFT);
     s += PF('M' + (x0 - 14) + ' ' + FY + 'H' + (x1 + 14) + 'V' + (FY + 16) + 'H' + (x0 - 14) + 'Z', 2.6, LN, SOFT);
     return s;
   }
-  function circlePath(cx, cy, r) { return 'M' + f(cx - r) + ' ' + f(cy) + 'a' + r + ' ' + r + ' 0 1 0 ' + (2 * r) + ' 0a' + r + ' ' + r + ' 0 1 0 ' + (-2 * r) + ' 0'; }
-  function ellipsePath(cx, cy, rx, ry) { return 'M' + f(cx - rx) + ' ' + f(cy) + 'a' + rx + ' ' + ry + ' 0 1 0 ' + (2 * rx) + ' 0a' + rx + ' ' + ry + ' 0 1 0 ' + (-2 * rx) + ' 0'; }
-  function hatch(x0, y0, x1, y1, step, w, c) {
-    var d = '';
-    for (var x = x0; x < x1; x += step) d += 'M' + f(x) + ' ' + y0 + 'V' + y1;
-    return P(d, w || 0.5, c || FAR);
+  // traced photo placed at x,y (top left), width w
+  function TRC(key, x, y, w, sw, col, cls) {
+    var t = TR[key]; if (!t) return '';
+    var k = w / t.w;
+    return '<g class="' + (cls || 'tr') + '" transform="translate(' + f(x) + ',' + f(y) + ') scale(' + (Math.round(k * 10000) / 10000) + ')"><path d="' + t.d + '" stroke="' + (col || LN) + '" stroke-width="' + f((sw || 1) / k) + '" fill="none" stroke-linejoin="round" stroke-linecap="round"/></g>';
   }
-  // simple figure for background people
-  function person(x, y, s, flip) {
-    var k = flip ? -1 : 1;
-    return '<g transform="translate(' + x + ',' + y + ') scale(' + (s * k) + ',' + s + ')">' +
-      PF(circlePath(0, -160, 11), 1.6, LN) + PF('M-11 -145h22l3 58h-28z', 1.6, LN) + P('M-6 -87v86M6 -87v86M-12 -142l-6 52M12 -142l6 52', 1.6, LN) + '</g>';
-  }
+  function trH(key, w) { var t = TR[key]; return t ? t.h * w / t.w : 0; }
 
-  // ---------- car (AE111 side elevation, ground at 0, front to the right) ----------
+  // ---------- AE111 side view ----------
   function wheel(cx) {
-    var d = circlePath(cx, -29, 29) + circlePath(cx, -29, 21) + circlePath(cx, -29, 5);
     var sp = '';
     for (var i = 0; i < 10; i++) { var a = i * Math.PI / 5; sp += 'M' + f(cx + Math.cos(a) * 6) + ' ' + f(-29 + Math.sin(a) * 6) + 'L' + f(cx + Math.cos(a + 0.12) * 20) + ' ' + f(-29 + Math.sin(a + 0.12) * 20); }
-    return PF(circlePath(cx, -29, 29), 2.2, LN) + P(circlePath(cx, -29, 21) + circlePath(cx, -29, 18), 1.1, LN) + P(sp, 0.9, LN) + PF(circlePath(cx, -29, 5), 1, LN);
+    return PF(cp(cx, -29, 29), 2.2) + P(cp(cx, -29, 21) + cp(cx, -29, 18), 1.1) + P(sp, 0.9) + PF(cp(cx, -29, 5), 1);
   }
   function carBody() {
-    var s = '';
-    s += PF('M420 -20L386 -20A37 37 0 0 0 309 -20L137 -20A37 37 0 0 0 63 -20L10 -20L3 -46L9 -76L106 -86L166 -131L262 -134L333 -92L333 -92L333 -88L418 -72L430 -58L430 -30Z', 2.4, LN);
-    s += P('M118 -88L167 -126L257 -129L321 -93Z', 1.3, LN);
-    s += P('M209 -129L213 -89M150 -112L152 -88', 1.6, LN);
-    s += P('M106 -86L333 -92M14 -58C120 -60 300 -62 426 -60', 0.8, LN);
-    s += P('M213 -89L216 -24M321 -92L318 -40M128 -86L138 -44', 1, LN);
-    s += P('M286 -80h18M186 -80h18', 1.8, LN);
-    s += P('M318 -96l12 -2l2 8l-12 1z', 1.3, LN);
-    s += P('M4 -70h22v12h-22z', 1.2, LN);
-    s += P('M404 -72l24 4v10l-24 -3z', 1.2, LN);
-    s += P('M396 -32h34M12 -32h40', 1, LN);
-    s += P('M150 -22h120', 0.6, FAR);
-    s += wheel(100) + wheel(346);
-    return s;
-  }
-  function bonnetPath() { return 'M333 -92L418 -76L418 -71L333 -87Z'; }
-  function engineSide() {
-    return P('M342 -84h60v-6h-60zM350 -90v-8h44v8M356 -98v-6h32v6M402 -86h12v20h-12', 1.1, LN) + P('M360 -104l4 -8M372 -104l4 -8M384 -104l4 -8', 1, LN);
-  }
-
-  // ---------- engine bay (top view, 4A-FE transverse) ----------
-  function engineBay(x, y, w, h) {
-    var s = '', k = w / 940;
-    function X(v) { return x + (v + 30) * k; } function Y(v) { return y + (v + 44) * k; }
-    function R(a, b, c, d2, wt, col) { return P('M' + f(X(a)) + ' ' + f(Y(b)) + 'H' + f(X(c)) + 'V' + f(Y(d2)) + 'H' + f(X(a)) + 'Z', wt, col); }
-    s += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + INK + '"/>';
-    s += P('M' + x + ' ' + y + 'h' + w + 'v' + h + 'h' + (-w) + 'Z', 2.6, HI);
-    s += T(x + 24, y + 30, 20, 'Engine bay, Toyota 4A-FE', HI, 'start', 500);
-    // body outline of bay
-    s += P('M' + X(30) + ' ' + Y(30) + 'Q' + X(310) + ' ' + Y(10) + ' ' + X(590) + ' ' + Y(30) + 'L' + X(600) + ' ' + Y(380) + 'L' + X(20) + ' ' + Y(380) + 'Z', 1.4, LN);
-    // radiator and fan
-    s += R(90, 40, 530, 72, 1.6);
-    var fins = ''; for (var i = 96; i < 528; i += 8) fins += 'M' + f(X(i)) + ' ' + f(Y(42)) + 'V' + f(Y(70));
-    s += P(fins, 0.4, FAR);
-    s += P(circlePath(X(410), Y(98), 34 * k) + circlePath(X(410), Y(98), 8 * k), 1.2, LN);
-    var bl = ''; for (var j = 0; j < 5; j++) { var a = j * 1.2566; bl += 'M' + f(X(410)) + ' ' + f(Y(98)) + 'Q' + f(X(410 + Math.cos(a + 0.6) * 22)) + ' ' + f(Y(98 + Math.sin(a + 0.6) * 22)) + ' ' + f(X(410 + Math.cos(a) * 32)) + ' ' + f(Y(98 + Math.sin(a) * 32)); }
-    s += P(bl, 0.8, LN);
-    s += R(470, 120, 520, 165, 1.1);
-    s += P('M' + X(472) + ' ' + Y(150) + 'H' + X(518), 0.5, FAR);
-    // battery
-    s += R(40, 90, 120, 150, 1.6);
-    s += P(circlePath(X(58), Y(102), 6 * k) + circlePath(X(102), Y(102), 6 * k), 1, LN);
-    s += T(X(54), Y(140), 10 * k + 3, '+', LN) + T(X(98), Y(140), 10 * k + 3, '–', LN);
-    // airbox and intake duct
-    s += R(40, 175, 150, 250, 1.5);
-    s += P('M' + X(48) + ' ' + Y(183) + 'H' + X(142) + 'V' + Y(242) + 'H' + X(48) + 'Z', 0.6, FAR);
-    s += P('M' + X(150) + ' ' + Y(205) + 'C' + X(190) + ' ' + Y(205) + ' ' + X(190) + ' ' + Y(285) + ' ' + X(230) + ' ' + Y(290) + 'M' + X(150) + ' ' + Y(228) + 'C' + X(175) + ' ' + Y(228) + ' ' + X(175) + ' ' + Y(305) + ' ' + X(230) + ' ' + Y(310), 1.3, LN);
-    var rib = ''; for (var r2 = 0; r2 < 6; r2++) rib += 'M' + f(X(160 + r2 * 10)) + ' ' + f(Y(208 + r2 * 13)) + 'l' + f(10 * k) + ' ' + f(14 * k);
-    s += P(rib, 0.6, FAR);
-    // exhaust heat shield (front of engine)
-    s += P('M' + X(230) + ' ' + Y(150) + 'H' + X(440) + 'L' + X(430) + ' ' + Y(178) + 'H' + X(240) + 'Z', 1.3, LN);
-    var hs = ''; for (var h2 = 250; h2 < 430; h2 += 14) hs += 'M' + f(X(h2)) + ' ' + f(Y(153)) + 'V' + f(Y(175));
-    s += P(hs, 0.5, FAR);
-    // valve cover
-    s += PF('M' + X(225) + ' ' + Y(184) + 'H' + X(450) + 'Q' + X(462) + ' ' + Y(184) + ' ' + X(462) + ' ' + Y(196) + 'V' + Y(244) + 'Q' + X(462) + ' ' + Y(256) + ' ' + X(450) + ' ' + Y(256) + 'H' + X(225) + 'Q' + X(213) + ' ' + Y(256) + ' ' + X(213) + ' ' + Y(244) + 'V' + Y(196) + 'Q' + X(213) + ' ' + Y(184) + ' ' + X(225) + ' ' + Y(184) + 'Z', 2.2, HI, INK);
-    s += P('M' + X(225) + ' ' + Y(196) + 'H' + X(450) + 'M' + X(225) + ' ' + Y(244) + 'H' + X(450), 0.6, LN);
-    var plugs = '', leads = '';
-    for (var p = 0; p < 4; p++) {
-      var px = 262 + p * 50;
-      plugs += circlePath(X(px), Y(220), 9 * k) + circlePath(X(px), Y(220), 4 * k);
-      leads += 'M' + f(X(px)) + ' ' + f(Y(211)) + 'C' + f(X(px)) + ' ' + f(Y(150 - p * 6)) + ' ' + f(X(200)) + ' ' + f(Y(150 - p * 4)) + ' ' + f(X(186)) + ' ' + f(Y(206 + p * 6));
-    }
-    s += P(plugs, 1.2, HI) + P(leads, 1, LN);
-    s += T(X(402), Y(250), 11 * k + 3, '4A-FE', HI, 'middle', 500);
-    // distributor at the end of the head
-    s += PF(circlePath(X(184), Y(220), 22 * k), 1.8, LN) + P(circlePath(X(184), Y(220), 12 * k), 0.8, LN);
-    // intake manifold runners towards firewall
-    var run = ''; for (var q = 0; q < 4; q++) { var rx = 262 + q * 50; run += 'M' + f(X(rx - 10)) + ' ' + f(Y(256)) + 'V' + f(Y(300)) + 'M' + f(X(rx + 10)) + ' ' + f(Y(256)) + 'V' + f(Y(300)); }
-    s += P(run, 1.1, LN);
-    s += R(230, 300, 440, 330, 1.5);
-    s += P(circlePath(X(230), Y(300), 16 * k), 1.2, LN);
-    // strut towers + strut bar
-    s += P(circlePath(X(70), Y(330), 30 * k) + circlePath(X(70), Y(330), 12 * k) + circlePath(X(550), Y(330), 30 * k) + circlePath(X(550), Y(330), 12 * k), 1.6, LN);
-    s += PF('M' + X(70) + ' ' + Y(344) + 'L' + X(550) + ' ' + Y(344) + 'L' + X(550) + ' ' + Y(354) + 'L' + X(70) + ' ' + Y(354) + 'Z', 2, HI, INK);
-    // brake booster, reservoir
-    s += P(circlePath(X(500), Y(240), 40 * k) + circlePath(X(500), Y(240), 30 * k), 1.3, LN);
-    s += P('M' + X(478) + ' ' + Y(176) + 'h' + f(44 * k) + 'v' + f(24 * k) + 'h' + f(-44 * k) + 'z', 1.1, LN);
-    // firewall
-    s += P('M' + X(20) + ' ' + Y(380) + 'Q' + X(310) + ' ' + Y(368) + ' ' + X(600) + ' ' + Y(380), 1.6, LN);
-    // callouts
-    function call(px, py, tx, ty, txt) { return P('M' + f(X(px)) + ' ' + f(Y(py)) + 'L' + f(X(tx)) + ' ' + f(Y(ty)), 0.7, HI) + P(circlePath(X(px), Y(py), 3), 1, HI) + T(X(tx) + 8, Y(ty) + 5, 15, txt, HI, 'start'); }
-    s += call(530, 349, 640, 360, 'Front strut bar, my addition');
-    s += call(528, 56, 640, 56, 'New radiator and fan');
-    s += call(412, 220, 640, 190, 'Iridium spark plugs');
-    s += call(184, 238, 640, 250, 'New distributor');
-    s += call(440, 315, 640, 305, 'New head gasket and timing chain');
+    var s = PF('M420 -20L386 -20A37 37 0 0 0 309 -20L137 -20A37 37 0 0 0 63 -20L10 -20L3 -46L9 -76L106 -86L166 -131L262 -134L333 -92L418 -72L430 -58L430 -30Z', 2.4);
+    s += P('M118 -88L167 -126L257 -129L321 -93Z', 1.3) + P('M209 -129L213 -89M150 -112L152 -88', 1.6);
+    s += P('M106 -86L333 -92M14 -58C120 -60 300 -62 426 -60', 0.8) + P('M213 -89L216 -24M321 -92L318 -40M128 -86L138 -44', 1);
+    s += P('M286 -80h18M186 -80h18', 1.8) + P('M318 -96l12 -2l2 8l-12 1z', 1.3) + P('M4 -70h22v12h-22z', 1.2) + P('M404 -72l24 4v10l-24 -3z', 1.2);
+    s += P('M396 -32h34M12 -32h40', 1) + wheel(100) + wheel(346);
     return s;
   }
 
-  // ---------- zones ----------
+  // ---------- world ----------
   var Z = {};
-  // Garage: 0 to 1700
+  // Office: 0..1200
   (function () {
-    var vx = 850, pr = proj(vx), s = '';
-    s += room(vx, 0, 1700, { tiles: true });
-    // sectional door on back wall
-    var dl = pr(220, 430, D), dr = pr(820, 430, D);
-    s += P(poly(pr, [[220, 430, D], [820, 430, D], [820, FY, D], [220, FY, D]], true), 1.1, LN);
-    for (var i = 1; i < 5; i++) { var yy = 430 + i * 54; s += P(seg(pr, [220, yy, D], [820, yy, D]), 0.6, LN); }
-    for (var w = 0; w < 6; w++) { var xx = 250 + w * 95; s += P(poly(pr, [[xx, 446, D], [xx + 70, 446, D], [xx + 70, 474, D], [xx, 474, D]], true), 0.6, LN); }
-    s += P(seg(pr, [220, 422, D], [220, 422, 200]) + seg(pr, [820, 422, D], [820, 422, 200]), 0.6, FAR);
-    // ceiling lights
-    [400, 900, 1350].forEach(function (x) { s += P(poly(pr, [[x - 70, CY + 8, 220], [x + 70, CY + 8, 220], [x + 70, CY + 16, 220], [x - 70, CY + 16, 220]], true), 0.9, LN); s += P(seg(pr, [x - 50, CY, 220], [x - 50, CY + 8, 220]) + seg(pr, [x + 50, CY, 220], [x + 50, CY + 8, 220]), 0.6, FAR); });
-    // tyre stack and tool chest on the left
-    for (var t = 0; t < 4; t++) { var tp = pr(110, FY - t * 26, 380); var sc = F / (F + 380); s += P(ellipsePath(tp[0], tp[1] - 13 * sc, 46 * sc, 13 * sc), 1, LN) + P(ellipsePath(tp[0], tp[1] - 13 * sc, 26 * sc, 7 * sc), 0.6, FAR); }
-    s += box(pr, vx, 900, 1040, 560, FY, 420, 500, 1.2);
-    for (var dr2 = 0; dr2 < 4; dr2++) { s += P(seg(pr, [905, 580 + dr2 * 30, 420], [1035, 580 + dr2 * 30, 420]), 0.6, LN); s += P(seg(pr, [950, 594 + dr2 * 30, 420], [990, 594 + dr2 * 30, 420]), 1, LN); }
-    // oil stain and drain
-    var dp = pr(560, FY, 160); s += P(ellipsePath(dp[0], dp[1], 40, 6), 0.5, FAR);
-    // workshop corner: pegboard, bench, printer, tools
-    var pb = [[1180, 440, D], [1640, 440, D], [1640, 590, D], [1180, 590, D]];
-    s += P(poly(pr, pb, true), 1.2, LN);
-    var holes = ''; for (var hx = 1200; hx < 1630; hx += 22) for (var hy = 452; hy < 585; hy += 22) { var hp = pr(hx, hy, D); holes += 'M' + f(hp[0]) + ' ' + f(hp[1]) + 'h0.8'; }
-    s += P(holes, 1.2, FAR);
-    function onWall(d0, x0, y0) { var o = pr(x0, y0, D), sc = F / (F + D); return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(sc) + ')">' + d0 + '</g>'; }
-    s += onWall(P('M0 0v70M-14 0h28v14h-28z', 2, LN), 1230, 470);
-    s += onWall(P('M0 0l30 80M-6 -2l12 -4l4 10l-12 4z', 1.6, LN), 1290, 465);
-    s += onWall(P('M0 0v80M-8 0a8 8 0 1 1 16 0M0 80l-6 6M0 80l6 6', 1.6, LN), 1360, 465);
-    s += onWall(P('M0 0h70l10 30h-90zM-10 30h90M10 30v40', 1.6, LN), 1430, 470);
-    s += onWall(P('M0 0v60M14 0v70M28 0v50M42 0v64M-4 -6h50', 1.6, LN), 1530, 470);
-    s += onWall(P(circlePath(0, 0, 18) + 'M0 18v50', 1.6, LN), 1610, 480);
-    s += box(pr, vx, 1170, 1650, 600, 616, 300, 470, 1.4);
-    s += P(seg(pr, [1190, 616, 300], [1190, FY, 300]) + seg(pr, [1630, 616, 300], [1630, FY, 300]) + seg(pr, [1190, 660, 300], [1630, 660, 300]), 1.4, LN);
-    // 3D printer on bench
-    s += box(pr, vx, 1500, 1610, 500, 600, 340, 440, 1.2);
-    s += P(poly(pr, [[1512, 512, 340], [1598, 512, 340], [1598, 590, 340], [1512, 590, 340]], true), 0.6, LN);
-    // solar dryer prototype on bench
-    s += box(pr, vx, 1200, 1300, 560, 600, 340, 420, 1.1);
-    s += P(seg(pr, [1200, 560, 340], [1300, 540, 340]) + seg(pr, [1300, 540, 340], [1300, 560, 340]), 1, LN);
-    // roller door at right wall (animated separately)
-    Z.garage = s;
-    Z.car = carBody();
-  })();
-
-  // Yard with pitch: 1700 to 3020
-  (function () {
-    var vx = 2360, pr = proj(vx), s = '';
-    s += P('M1700 ' + EYE + 'H3020', 0.8, FAR);
-    var tr = ''; for (var x = 1730; x < 3000; x += 90) { var hh = 40 + (x * 7 % 30); tr += 'M' + (x + 30) + ' ' + EYE + 'v-' + (hh * 0.4) + 'M' + x + ' ' + (EYE - hh * 0.4) + 'c-8 -6 -6 -' + (hh * 0.5) + ' 10 -' + (hh * 0.55) + 'c4 -' + (hh * 0.4) + ' 36 -' + (hh * 0.4) + ' 40 0c16 4 18 ' + (hh * 0.5) + ' 10 ' + (hh * 0.55) + 'z'; }
-    s += P(tr, 0.7, FAR);
-    s += P('M1700 520h1320', 0.4, FAR);
-    s += P('M2700 470q60 -40 120 0', 0.5, FAR);
-    // pitch in perspective
-    var x0 = 1800, x1 = 2900, z0 = 40, z1 = 560;
-    s += P(poly(pr, [[x0, FY, z0], [x1, FY, z0], [x1, FY, z1], [x0, FY, z1]], true), 1.4, LN);
-    s += P(seg(pr, [2350, FY, z0], [2350, FY, z1]), 0.9, LN);
-    var cc = ''; for (var a = 0; a <= 32; a++) { var ang = a / 32 * Math.PI * 2; var q = pr(2350 + Math.cos(ang) * 120, FY, 300 + Math.sin(ang) * 110); cc += (a ? 'L' : 'M') + f(q[0]) + ' ' + f(q[1]); }
-    s += P(cc, 0.9, LN);
-    s += P(poly(pr, [[x1, FY, 160], [x1 - 160, FY, 160], [x1 - 160, FY, 440], [x1, FY, 440]]), 0.9, LN);
-    for (var st = 1; st < 8; st++) { var zz = z0 + (z1 - z0) * st / 8; s += P(seg(pr, [x0, FY, zz], [x1, FY, zz]), 0.3, FAR); }
-    // goal at right end
-    var gz0 = 220, gz1 = 380, gy = FY - 170, gx = 2890;
-    s += P(poly(pr, [[gx, FY, gz0], [gx, gy, gz0], [gx, gy, gz1], [gx, FY, gz1]]), 3, HI);
-    s += P(seg(pr, [gx, gy, gz0], [gx + 70, FY, gz0 + 10]) + seg(pr, [gx, gy, gz1], [gx + 70, FY, gz1 - 10]), 1, LN);
-    var net = ''; for (var nz = gz0 + 16; nz < gz1; nz += 16) { var p1 = pr(gx, gy, nz), p2 = pr(gx + 70, FY, nz); net += 'M' + f(p1[0]) + ' ' + f(p1[1]) + 'L' + f(p2[0]) + ' ' + f(p2[1]); }
-    for (var ny = gy + 17; ny < FY; ny += 17) { var t = (ny - gy) / (FY - gy); var p3 = pr(gx + 70 * t, ny, gz0), p4 = pr(gx + 70 * t, ny, gz1); net += 'M' + f(p3[0]) + ' ' + f(p3[1]) + 'L' + f(p4[0]) + ' ' + f(p4[1]); }
-    s += P(net, 0.4, FAR);
-    // VP desk with laptop and clipboard
-    s += box(pr, vx, 2000, 2200, 610, 620, 120, 210, 1.4);
-    s += P(seg(pr, [2010, 620, 120], [2010, FY, 120]) + seg(pr, [2190, 620, 120], [2190, FY, 120]), 1.4, LN);
-    var lp = pr(2060, 610, 150), sc = F / (F + 150);
-    s += '<g transform="translate(' + f(lp[0]) + ',' + f(lp[1]) + ') scale(' + f(sc) + ')">' + P('M0 0h70l-6 -48h-58zM6 -6h58', 1.4, LN) + P('M100 0l6 -40h40l4 40z', 1.2, LN) + P('M112 -30h26M112 -22h20M112 -14h24', 0.6, LN) + '</g>';
-    // pennant
-    var fl = pr(1960, FY, 160);
-    s += '<g transform="translate(' + f(fl[0]) + ',' + f(fl[1]) + ') scale(' + f(F / (F + 160)) + ')">' + P('M0 0v-150M0 -150l60 18l-60 18', 1.4, LN) + T(10, -126, 13, 'FC', LN) + '</g>';
-    // golf green in the distance
-    for (var fx2 = 1800; fx2 <= 2900; fx2 += 40) s += P(seg(pr, [fx2, FY, 620], [fx2, FY - 60, 620]), 0.5, FAR);
-    s += P(seg(pr, [1800, FY - 50, 620], [2900, FY - 50, 620]) + seg(pr, [1800, FY - 30, 620], [2900, FY - 30, 620]), 0.5, FAR);
-    var g = pr(3500, FY, 1800), gs = F / (F + 1800);
-    s += P(ellipsePath(g[0], g[1], 260 * gs, 40 * gs), 0.7, FAR);
-    s += '<g transform="translate(' + f(g[0]) + ',' + f(g[1]) + ') scale(' + f(gs) + ')">' + P('M0 0v-160M0 -160l50 16l-50 16', 2, LN) + '</g>';
-    s += T(g[0], g[1] + 20, 11, 'golf', FAR, 'middle');
-    Z.yard = s;
-  })();
-
-  // Office with perfume wall: 3020 to 4120
-  (function () {
-    var vx = 3570, pr = proj(vx), s = '';
-    s += room(vx, 3020, 4120, { boards: 12 });
-    // window on left back
-    s += P(poly(pr, [[3060, 440, D], [3220, 440, D], [3220, 560, D], [3060, 560, D]], true) + seg(pr, [3140, 440, D], [3140, 560, D]), 1, LN);
-    // perfume wall shelves
-    var shelves = [470, 530, 590];
-    shelves.forEach(function (y) { s += P(seg(pr, [3260, y, D], [4080, y, D]) + seg(pr, [3260, y, D], [3260, y, D - 40]) , 1.2, LN); s += P(seg(pr, [3260, y, D - 40], [4080, y, D - 40]), 0.8, LN); });
-    var bot = ''; var shapes = [
-      function (x, y) { return 'M' + x + ' ' + y + 'v-22h14v22zM' + (x + 4) + ' ' + (y - 22) + 'v-6h6v6zM' + (x + 2) + ' ' + (y - 28) + 'h10v-6h-10z'; },
-      function (x, y) { return 'M' + (x - 2) + ' ' + y + 'q0 -24 9 -24q9 0 9 24zM' + (x + 4) + ' ' + (y - 24) + 'v-8h6v8z'; },
-      function (x, y) { return 'M' + x + ' ' + y + 'l2 -26h12l2 26zM' + (x + 4) + ' ' + (y - 26) + 'v-10h8v10z'; },
-      function (x, y) { return 'M' + x + ' ' + y + 'v-16h18v16zM' + (x + 5) + ' ' + (y - 16) + 'v-12h8v12z'; }];
-    var sc = F / (F + D - 20);
-    shelves.forEach(function (y, r) {
-      for (var i = 0; i < 26; i++) {
-        var p = pr(3280 + i * 31, y, D - 20);
-        bot += '<g transform="translate(' + f(p[0]) + ',' + f(p[1]) + ') scale(' + f(sc) + ')">' + P(shapes[(i + r) % 4](0, 0), 1, LN) + '</g>';
-      }
-    });
-    s += bot;
-    s += T(pr(3670, 418, D)[0], pr(3670, 418, D)[1], 12, 'Armaf, and five more brands', HI, 'middle');
+    var vx = 600, pr = proj(vx), s = '';
+    s += room(vx, 0, 1200, { boards: 12, doorR: true });
+    s += P(poly(pr, [[50, 440, D], [210, 440, D], [210, 560, D], [50, 560, D]], true) + seg(pr, [130, 440, D], [130, 560, D]), 1);
+    var sg = pr(800, 425, D); s += T(sg[0], sg[1], 22, 'Fragrance Castle Singapore', HI, 'middle', 500);
+    var shelves = [480, 540, 600], sc = F / (F + D - 20);
+    shelves.forEach(function (y) { s += P(seg(pr, [420, y, D], [1170, y, D]), 1.2) + P(seg(pr, [420, y, D - 40], [1170, y, D - 40]) + seg(pr, [420, y, D], [420, y, D - 40]), 0.8); });
+    var shapes = [
+      function () { return 'M0 0v-22h14v22zM4 -22v-6h6v6zM2 -28h10v-6h-10z'; },
+      function () { return 'M-2 0q0 -24 9 -24q9 0 9 24zM4 -24v-8h6v8z'; },
+      function () { return 'M0 0l2 -26h12l2 26zM4 -26v-10h8v10z'; },
+      function () { return 'M0 0v-16h18v16zM5 -16v-12h8v12z'; }];
+    shelves.forEach(function (y, r) { for (var i = 0; i < 24; i++) { var p = pr(440 + i * 30, y, D - 20); s += '<g transform="translate(' + f(p[0]) + ',' + f(p[1]) + ') scale(' + f(sc) + ')">' + P(shapes[(i + r) % 4](), 1) + '</g>'; } });
+    // desk with marketplace screen
+    s += box(pr, vx, 70, 380, 610, 624, 160, 270, 1.5) + P(seg(pr, [80, 624, 160], [80, FY, 160]) + seg(pr, [370, 624, 160], [370, FY, 160]), 1.5);
+    var mp = pr(150, 610, 220), ms = F / (F + 220);
+    s += '<g transform="translate(' + f(mp[0]) + ',' + f(mp[1]) + ') scale(' + f(ms) + ')">' + PF('M-6 -110h150v86h-150z', 1.6) + P('M66 -24v20M44 -4h44', 1.6) + P('M6 -96h36M6 -86h28M6 -76h32', 0.8) + P('M60 -40v-20M74 -40v-34M88 -40v-28M102 -40v-46M116 -40v-38', 2) + PF('M170 -4h50v-34h-50z', 1.4) + P('M178 -38v-6h34v6M182 -4l4 10h18l4 -10', 1) + '</g>';
+    s += T(mp[0] + 4, mp[1] - 118 * ms, 10, 'Shopee, Lazada, Shopify', FAR);
+    // display counter
+    s += box(pr, vx, 690, 1010, 600, FY, 100, 190, 1.5);
+    var cb = ''; [770, 820, 870, 930, 980].forEach(function (x, i) { var p = pr(x, 600, 140); cb += '<g transform="translate(' + f(p[0]) + ',' + f(p[1]) + ') scale(' + f(F / (F + 140)) + ')">' + P(shapes[i % 4](), 1.3) + '</g>'; });
+    s += cb;
     // wholesale cartons
-    [[3880, 640, 4000, FY, 150, 260], [3900, 580, 3990, 640, 160, 250], [4010, 620, 4100, FY, 140, 240]].forEach(function (b) {
-      s += box(pr, vx, b[0], b[2], b[1], b[3], b[4], b[5], 1.2);
-      s += P(seg(pr, [(b[0] + b[2]) / 2, b[1], b[4]], [(b[0] + b[2]) / 2, b[3], b[4]]), 0.6, LN);
-    });
-    // desk, monitor, label printer, parcel
-    s += box(pr, vx, 3260, 3560, 610, 624, 140, 250, 1.5);
-    s += P(seg(pr, [3270, 624, 140], [3270, FY, 140]) + seg(pr, [3550, 624, 140], [3550, FY, 140]), 1.5, LN);
-    var mp = pr(3330, 610, 210), ms = F / (F + 210);
-    s += '<g transform="translate(' + f(mp[0]) + ',' + f(mp[1]) + ') scale(' + f(ms) + ')">' +
-      PF('M-6 -110h150v86h-150z', 1.6, LN) + P('M66 -24v20M44 -4h44', 1.6, LN) +
-      P('M6 -96h36M6 -86h28M6 -76h32', 0.8, LN) + P('M60 -40v-20M74 -40v-34M88 -40v-28M102 -40v-46M116 -40v-38', 2, LN) + P('M56 -40h68', 0.6, LN) +
-      PF('M170 -4h50v-34h-50z', 1.4, LN) + P('M178 -38v-6h34v6M182 -4l4 10h18l4 -10', 1, LN) +
-      PF('M236 -4h60v-30h-60z', 1.3, LN) + P('M236 -34l14 -10h60l-14 10M296 -4l14 -10v-30', 1, LN) + '</g>';
-    s += T(mp[0] + 10, mp[1] - 120 * ms, 10, 'Shopee · Lazada · Shopify', FAR);
-    // chair
-    var cp = pr(3420, FY, 100), cs = F / (F + 100);
-    s += '<g transform="translate(' + f(cp[0]) + ',' + f(cp[1]) + ') scale(' + f(cs) + ')">' + P('M-30 -60h60M0 -60v40M-24 0l24 -20l24 20M-30 -60l-4 -60h68l-4 60', 1.4, LN) + '</g>';
+    s += box(pr, vx, 1040, 1160, 620, FY, 170, 270, 1.2) + box(pr, vx, 1055, 1150, 560, 620, 180, 260, 1.1);
     Z.office = s;
+    Z.pickBottle = pr(725, 600, 140);
   })();
 
-  // Hallway with police photos: 4120 to 4920
+  // Hall: 1200..2200 (shallow, gallery)
   (function () {
-    var vx = 4520, pr = proj(vx), s = '';
-    s += room(vx, 4120, 4920, { boards: 8 });
-    var frames = [[4190, 'Squad drill'], [4380, 'Fitness training'], [4570, 'ORD speech'], [4740, 'Passing out']];
-    frames.forEach(function (fr, i) {
-      var x = fr[0], y0 = 450, y1 = 560, w = 140;
-      s += PF(poly(pr, [[x, y0, D], [x + w, y0, D], [x + w, y1, D], [x, y1, D]], true), 1.6, LN);
-      s += P(poly(pr, [[x + 8, y0 + 8, D], [x + w - 8, y0 + 8, D], [x + w - 8, y1 - 8, D], [x + 8, y1 - 8, D]], true), 0.6, LN);
-      var o = pr(x + 8, y1 - 10, D), sc = F / (F + D), inner = '';
-      if (i === 0) { for (var r = 0; r < 3; r++) for (var c = 0; c < 6; c++) inner += 'M' + (12 + c * 20 + r * 4) + ' ' + (-14 - r * 22) + 'v-14m0 0a3 3 0 1 0 0.1 0'; }
-      if (i === 1) { inner = 'M20 -10l10 -20l-6 -16M30 -30l12 6M24 -46a4 4 0 1 0 0.1 0M60 -10l10 -20l-6 -16M70 -30l12 6M64 -46a4 4 0 1 0 0.1 0M0 -8h124'; }
-      if (i === 2) { inner = 'M50 -8h30v-34h-30zM65 -42v-12M58 -60a6 6 0 1 0 12 0a6 6 0 1 0 -12 0M80 -48l14 -10'; }
-      if (i === 3) { for (var c2 = 0; c2 < 7; c2++) inner += 'M' + (10 + c2 * 16) + ' -10v-24m0 0a4 4 0 1 0 0.1 0'; inner += 'M0 -60h124'; }
-      s += '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(sc) + ')">' + P(inner, 1.2, LN) + '</g>';
-      var lp = pr(x + w / 2, y1 + 18, D); s += T(lp[0], lp[1], 10, fr[1], FAR, 'middle');
+    var vx = 1700, dd = 220, pr = function (x, y, z) { var s = F / (F + z); return [vx + (x - vx) * s, EYE + (y - EYE) * s]; }, s = '';
+    s += room(vx, 1200, 2200, { boards: 8, depth: dd, doorL: true, doorR: true });
+    var k = F / (F + dd), frames = [['fitness', 1300, 'Fitness training'], ['drill', 1650, 'Drill'], ['ord', 1980, 'ORD speech']];
+    frames.forEach(function (fr) {
+      var p = pr(fr[1], 470, dd), w = fr[0] === 'ord' ? 150 : 260 * k * 1.05, h = trH(fr[0], w);
+      if (fr[0] === 'ord') { w = 150; h = trH('ord', 150); }
+      var x = p[0] - w / 2, y = 470 + (fr[0] === 'drill' ? 25 : 0);
+      s += PF('M' + f(x - 10) + ' ' + f(y - 10) + 'h' + f(w + 20) + 'v' + f(h + 20) + 'h' + f(-(w + 20)) + 'Z', 2, LN);
+      s += TRC(fr[0], x, y, w, 0.7, LN);
+      s += T(x + w / 2, y - 22, 13, fr[2], LN, 'middle');
     });
-    [4300, 4700].forEach(function (x) { var p = pr(x, CY + 6, 260); s += P(ellipsePath(p[0], p[1], 22, 6), 1, LN); });
-    // front door at the right wall
-    s += P('M4890 ' + (FY - 230) + 'h26v230', 1.2, LN);
+    [1400, 2000].forEach(function (x) { var p = pr(x, CY + 6, 110); s += P(ep(p[0], p[1], 22, 6), 1); });
     Z.hall = s;
   })();
 
-  // Ekosys site: 4920 to 6320
+  // Ekosys site: 2200..3600
   (function () {
-    var vx = 5620, pr = proj(vx), s = '';
-    s += P('M4920 ' + EYE + 'H6320', 0.8, FAR);
-    // building frame under construction, far
-    var bz = 600, bx0 = 5250, bx1 = 6050;
-    for (var lv = 0; lv <= 5; lv++) { var yy = FY - lv * 70; s += P(seg(pr, [bx0, yy, bz], [bx1, yy, bz]), lv ? 1.3 : 1, LN); }
-    for (var cx = bx0; cx <= bx1; cx += 120) s += P(seg(pr, [cx, FY, bz], [cx, FY - 350, bz]), 1.3, LN);
-    var reb = ''; for (var rx = bx0; rx <= bx1; rx += 30) { var a = pr(rx, FY - 350, bz), b = pr(rx, FY - 380, bz); reb += 'M' + f(a[0]) + ' ' + f(a[1]) + 'L' + f(b[0]) + ' ' + f(b[1]); }
-    s += P(reb, 0.5, LN);
-    // scaffolding
-    var sc0 = 560;
-    for (var sx = bx0 - 20; sx <= bx1 + 20; sx += 60) s += P(seg(pr, [sx, FY, sc0], [sx, FY - 330, sc0]), 0.6, FAR);
-    for (var sy = 0; sy <= 330; sy += 55) s += P(seg(pr, [bx0 - 20, FY - sy, sc0], [bx1 + 20, FY - sy, sc0]), 0.6, FAR);
-    for (var dx = bx0 - 20; dx < bx1; dx += 120) s += P(seg(pr, [dx, FY, sc0], [dx + 120, FY - 165, sc0]), 0.4, FAR);
-    // tower crane
-    var cz = 760, cxx = 6150;
-    var m0 = pr(cxx, FY, cz), m1 = pr(cxx, FY - 640, cz), j0 = pr(cxx - 700, FY - 640, cz), j1 = pr(cxx + 220, FY - 640, cz), ap = pr(cxx, FY - 720, cz);
-    s += P('M' + f(m0[0] - 8) + ' ' + f(m0[1]) + 'L' + f(m1[0] - 8) + ' ' + f(m1[1]) + 'M' + f(m0[0] + 8) + ' ' + f(m0[1]) + 'L' + f(m1[0] + 8) + ' ' + f(m1[1]), 1.2, LN);
-    var lat = ''; for (var k = 0; k < 20; k++) { var ya = m0[1] + (m1[1] - m0[1]) * k / 20, yb = m0[1] + (m1[1] - m0[1]) * (k + 1) / 20; lat += 'M' + f(m0[0] - 8) + ' ' + f(ya) + 'L' + f(m0[0] + 8) + ' ' + f(yb); }
-    s += P(lat, 0.5, LN);
-    s += P('M' + f(j0[0]) + ' ' + f(j0[1]) + 'L' + f(j1[0]) + ' ' + f(j1[1]) + 'M' + f(j0[0]) + ' ' + f(j0[1] + 10) + 'L' + f(j1[0]) + ' ' + f(j1[1] + 10) + 'M' + f(j0[0]) + ' ' + f(j0[1]) + 'L' + f(ap[0]) + ' ' + f(ap[1]) + 'L' + f(j1[0]) + ' ' + f(j1[1]), 1, LN);
-    s += PF('M' + f(j1[0] - 30) + ' ' + f(j1[1] + 10) + 'h30v30h-30z', 1, LN);
-    Z.craneHook = [m1[0] - 300, m1[1] + 10];
-    // hoarding
-    for (var hx = 4960; hx < 6320; hx += 100) s += P(poly(pr, [[hx, FY, 400], [hx + 96, FY, 400], [hx + 96, FY - 120, 400], [hx, FY - 120, 400]], true), 0.9, LN);
-    var hp = pr(5200, FY - 70, 400); s += T(hp[0], hp[1], 13, 'Safety first. PPE required.', LN);
-    // site office containers
-    s += box(pr, vx, 4980, 5200, 600, FY, 200, 300, 1.4) + box(pr, vx, 4990, 5190, 510, 600, 210, 290, 1.2);
-    s += P(poly(pr, [[5010, 530, 210], [5070, 530, 210], [5070, 570, 210], [5010, 570, 210]], true), 0.8, LN);
-    var so = pr(5080, 640, 200); s += T(so[0], so[1], 12, 'Site office', LN, 'middle');
-    // mixer truck
-    var mt = pr(5900, FY, 220), ms = F / (F + 220);
-    s += '<g transform="translate(' + f(mt[0]) + ',' + f(mt[1]) + ') scale(' + f(ms) + ')">' +
-      PF('M0 -24h220v-20h-220zM180 -44v-50h40l20 30v40h-20', 1.6, LN) + P('M190 -88h24l12 20h-36z', 1, LN) +
-      PF('M20 -50l140 -10l-10 -70l-120 10z', 1.6, LN) + P('M40 -54l-10 -64M70 -56l-10 -66M100 -58l-10 -68M130 -60l-10 -68', 0.7, LN) +
-      PF(circlePath(40, -12, 16), 1.6, LN) + PF(circlePath(90, -12, 16), 1.6, LN) + PF(circlePath(200, -12, 16), 1.6, LN) + '</g>';
-    // ground
-    s += P('M4920 ' + FY + 'H6320', 2, LN);
-    var gr = ''; for (var gx = 4940; gx < 6320; gx += 40) gr += 'M' + gx + ' ' + (FY + 8) + 'l14 0';
+    var s = '';
+    s += P('M2214 ' + FY + 'H3600', 2);
+    var w = 1300, h = trH('site', w);
+    s += TRC('site', 2260, FY - h, w, 1, LN);
+    var gr = ''; for (var gx = 2230; gx < 3600; gx += 40) gr += 'M' + gx + ' ' + (FY + 8) + 'h14';
     s += P(gr, 0.6, FAR);
     Z.site = s;
   })();
 
-  // Travel: 6320 to 6720
-  (function () {
-    var s = '';
-    s += P('M6320 ' + EYE + 'H6720', 0.6, FAR);
-    s += '<path d="M6340 640C6440 420 6600 380 6700 300" stroke="' + LN + '" stroke-width="1" fill="none" stroke-dasharray="6 8"/>';
-    s += P('M6330 ' + FY + 'H6720', 2, LN);
-    Z.travel = s;
-    Z.plane = P('M-40 0h70l18 -6l4 6l-4 6l-18 -6M0 0l-20 -30h12l28 30M0 0l-20 30h12l28 -30M-40 0l-10 -14h8l10 14', 1.6, HI);
-  })();
+  // flights
+  function route(x0, x1, a, b) {
+    var s = '<path d="M' + x0 + ' ' + (FY - 40) + 'Q' + ((x0 + x1) / 2) + ' ' + (FY - 520) + ' ' + x1 + ' ' + (FY - 40) + '" stroke="' + FAR + '" stroke-width="1.2" fill="none" stroke-dasharray="6 8"/>';
+    s += PF(cp(x0, FY - 40, 6), 1.4, HI) + PF(cp(x1, FY - 40, 6), 1.4, HI);
+    s += T(x0, FY - 10, 16, a, HI, 'middle', 500) + T(x1, FY - 10, 16, b, HI, 'middle', 500);
+    return s + P('M' + (x0 - 40) + ' ' + FY + 'H' + (x1 + 40), 1, FAR);
+  }
+  Z.fly1 = route(3640, 4060, 'Singapore', 'Shanghai');
+  Z.fly2 = route(5240, 5660, 'Guangzhou', 'Singapore');
+  Z.plane = P('M-40 0h70l18 -6l4 6l-4 6l-18 -6M0 0l-20 -30h12l28 30M0 0l-20 30h12l28 -30M-40 0l-10 -14h8l10 14', 1.6, HI);
 
-  // dsm-firmenich room: 6720 to 7840
+  // dsm-firmenich: 4100..5220
   (function () {
-    var vx = 7280, pr = proj(vx), s = '';
-    s += room(vx, 6720, 7840, { tiles: true });
-    // big window with Shanghai skyline
-    var w0 = 6880, w1 = 7700, wy0 = 420, wy1 = 600;
-    s += P(poly(pr, [[w0, wy0, D], [w1, wy0, D], [w1, wy1, D], [w0, wy1, D]], true), 1.4, LN);
-    s += P(seg(pr, [(w0 + w1) / 2, wy0, D], [(w0 + w1) / 2, wy1, D]), 0.8, LN);
-    var o = pr(w0, wy1, D), sc = F / (F + D);
-    var sk = 'M0 0V-40h40v-30h30v40h30v-60h24v80h30v-50h40v50';
-    sk += 'M200 0V-90M196 -90a8 8 0 1 0 8 0M190 -60a10 10 0 1 0 20 0a10 10 0 1 0 -20 0M200 -20a20 20 0 1 0 0.1 0M190 0l6 -40M210 0l-6 -40M200 -98v-30';
-    sk += 'M300 0V-120l10 -10l10 10V0M300 -100h20M300 -80h20M300 -60h20M300 -40h20M310 -130v-20';
-    sk += 'M380 0C380 -80 392 -140 400 -170C408 -140 420 -80 420 0M386 -100h28M392 -140h16';
-    sk += 'M460 0V-150h36V0M466 -144h24v10h-24zM496 -110h30V0M560 0v-60h40v60M620 0v-90h28v90M680 0v-40h60v40';
-    s += '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(sc) + ')">' + P(sk, 1.1, LN) + P('M0 6h800', 0.6, FAR) + '</g>';
-    var lb = pr(w0 + 10, wy0 - 14, D); s += T(lb[0], lb[1], 11, 'Shanghai', FAR);
-    // evaluation bench with blotters and candles (left)
-    s += box(pr, vx, 6780, 7050, 600, 614, 140, 240, 1.4);
-    s += P(seg(pr, [6790, 614, 140], [6790, FY, 140]) + seg(pr, [7040, 614, 140], [7040, FY, 140]), 1.4, LN);
-    var bp = pr(6820, 600, 180), bs = F / (F + 180);
-    var bl = 'M0 0h40v-14h-40z'; for (var i = 0; i < 6; i++) bl += 'M' + (4 + i * 6) + ' -14l' + (i - 2.5) * 3 + ' -60';
+    var vx = 4660, pr = proj(vx), s = '';
+    s += room(vx, 4100, 5220, { tiles: true, doorL: true, doorR: true });
+    var o, sc = F / (F + D);
+    // Shanghai window
+    s += P(poly(pr, [[4180, 420, D], [4800, 420, D], [4800, 600, D], [4180, 600, D]], true), 1.4);
+    o = pr(4180, 600, D);
+    var sh = 'M0 0V-40h40v-30h30v40h30v-60h24v80h30v-50h40v50M200 0V-90M196 -90a8 8 0 1 0 8 0M190 -60a10 10 0 1 0 20 0a10 10 0 1 0 -20 0M200 -20a20 20 0 1 0 0.1 0M190 0l6 -40M210 0l-6 -40M200 -98v-30M300 0V-120l10 -10l10 10V0M300 -100h20M300 -80h20M300 -60h20M310 -130v-20M380 0C380 -80 392 -140 400 -170C408 -140 420 -80 420 0M386 -100h28M392 -140h16M460 0V-150h36V0M466 -144h24v10h-24zM496 -110h30V0M560 0v-60h40v60';
+    s += '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(sc) + ')">' + P(sh, 1.1) + '</g>';
+    var l1 = pr(4190, 408, D); s += T(l1[0], l1[1], 12, 'Shanghai', HI);
+    // Guangzhou window with Canton Tower
+    s += P(poly(pr, [[4860, 420, D], [5140, 420, D], [5140, 600, D], [4860, 600, D]], true), 1.4);
+    o = pr(4860, 600, D);
+    var ct = 'M80 0C96 -60 70 -120 88 -170M120 0C104 -60 130 -120 112 -170M88 -170h24M100 -170v-50M86 -40h28M84 -80h32M88 -120h24M84 -150h32';
+    var lat = ''; for (var i = 0; i < 8; i++) lat += 'M' + (84 + i * 2) + ' ' + (-i * 20) + 'L' + (116 - i * 2) + ' ' + (-i * 20 - 20);
+    ct += lat + 'M10 0V-70h30V0M150 0V-130l14 -12l14 12V0M150 -110h28M200 0V-90h40V0M250 0V-50h30V0';
+    s += '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(sc * 1.1) + ')">' + P(ct, 1.1) + '</g>';
+    var l2 = pr(4870, 408, D); s += T(l2[0], l2[1], 12, 'Guangzhou', HI);
+    // smelling bench
+    s += box(pr, vx, 4160, 4400, 600, 614, 140, 240, 1.4) + P(seg(pr, [4170, 614, 140], [4170, FY, 140]) + seg(pr, [4390, 614, 140], [4390, FY, 140]), 1.4);
+    var bp = pr(4200, 600, 180), bs = F / (F + 180), bl = 'M0 0h40v-14h-40z';
+    for (i = 0; i < 6; i++) bl += 'M' + (4 + i * 6) + ' -14l' + (i - 2.5) * 3 + ' -60';
     bl += 'M80 0h24v-30h-24zM120 0h24v-30h-24zM160 0h24v-30h-24zM92 -30v-10M132 -30v-10M172 -30v-10';
-    s += '<g transform="translate(' + f(bp[0]) + ',' + f(bp[1]) + ') scale(' + f(bs) + ')">' + P(bl, 1.3, LN) + P('M92 -40q-6 -8 0 -16q6 8 0 16M132 -40q-6 -8 0 -16q6 8 0 16M172 -40q-6 -8 0 -16q6 8 0 16', 1, HI) + '</g>';
-    // meeting table with two clients (middle)
-    s += box(pr, vx, 7150, 7450, 610, 622, 200, 330, 1.4);
-    s += P(seg(pr, [7300, 622, 260], [7300, FY, 260]), 1.4, LN);
-    var c1 = pr(7200, FY, 380), c2 = pr(7400, FY, 380);
-    s += person(c1[0], c1[1], F / (F + 380) * 0.95, false) + person(c2[0], c2[1], F / (F + 380), true);
-    var tp = pr(7260, 610, 260); s += P('M' + f(tp[0]) + ' ' + f(tp[1]) + 'h30l-4 -6h-22z', 1, LN);
-    // blending station (right)
-    s += box(pr, vx, 7520, 7800, 600, 614, 140, 240, 1.4);
-    s += P(seg(pr, [7530, 614, 140], [7530, FY, 140]) + seg(pr, [7790, 614, 140], [7790, FY, 140]), 1.4, LN);
-    var ep = pr(7550, 600, 180), es = F / (F + 180);
-    var eq = 'M0 0l6 -30v-20h14v20l6 30zM50 0v-44h20v44zM50 -20h20M90 0h60v-10h-60zM96 -10v-6h48v6M170 0v-70M166 -70h8M170 -40h30M200 -40v-8';
-    s += '<g transform="translate(' + f(ep[0]) + ',' + f(ep[1]) + ') scale(' + f(es) + ')">' + P(eq, 1.3, LN) + T(120, -20, 10, '0.00 g', LN, 'middle') + '</g>';
+    s += '<g transform="translate(' + f(bp[0]) + ',' + f(bp[1]) + ') scale(' + f(bs) + ')">' + P(bl, 1.3) + P('M92 -40q-6 -8 0 -16q6 8 0 16M132 -40q-6 -8 0 -16q6 8 0 16M172 -40q-6 -8 0 -16q6 8 0 16', 1, HI) + '</g>';
+    // meeting table
+    s += box(pr, vx, 4500, 4780, 610, 622, 200, 330, 1.4) + P(seg(pr, [4640, 622, 260], [4640, FY, 260]), 1.4);
+    // blending station, Guangzhou
+    s += box(pr, vx, 4880, 5160, 600, 614, 140, 240, 1.4) + P(seg(pr, [4890, 614, 140], [4890, FY, 140]) + seg(pr, [5150, 614, 140], [5150, FY, 140]), 1.4);
+    var e2 = pr(4910, 600, 180);
+    s += '<g transform="translate(' + f(e2[0]) + ',' + f(e2[1]) + ') scale(' + f(bs) + ')">' + P('M0 0l6 -30v-20h14v20l6 30zM50 0v-44h20v44zM50 -20h20M90 0h60v-10h-60zM96 -10v-6h48v6M170 0v-70M166 -70h8M170 -40h30M200 -40v-8', 1.3) + T(120, -20, 10, '0.00 g', LN, 'middle') + '</g>';
+    var tg = pr(5020, 640, 140); s += T(tg[0], tg[1], 13, 'Guangzhou', HI, 'middle', 500);
     Z.dsm = s;
+    Z.clients = [pr(4560, FY, 380), pr(4740, FY, 380), F / (F + 380)];
   })();
 
-  // Ceiling map, above the dsm room
+  // Pitch: 5700..7020
   (function () {
-    var M = window.MAP, x0 = 6640, y0 = -330, w = 1280, k = w / M.w, h = M.h * k, s = '';
-    s += PF('M' + (x0 - 20) + ' ' + (y0 - 60) + 'h' + (w + 40) + 'v' + (h + 100) + 'h' + (-(w + 40)) + 'Z', 2.4, LN, SOFT);
-    s += T(x0, y0 - 24, 18, 'Where I have worked', HI, 'start', 500);
-    s += '<g transform="translate(' + x0 + ',' + y0 + ') scale(' + f(k) + ')">' + P(M.d, 1.2 / k, LN) + '</g>';
-    var gr = ''; for (var i = 1; i < 8; i++) gr += 'M' + f(x0 + w * i / 8) + ' ' + y0 + 'V' + f(y0 + h); for (var j = 1; j < 5; j++) gr += 'M' + x0 + ' ' + f(y0 + h * j / 5) + 'H' + (x0 + w);
-    s += P(gr, 0.4, FAR);
-    Z.map = s;
-    Z.mapGeo = { x0: x0, y0: y0, k: k, c: M.c };
-    // beams down to the room
-    Z.mapBeams = P('M' + (x0 - 20) + ' ' + f(y0 + h + 40) + 'L6720 ' + CY + 'M' + (x0 + w + 20) + ' ' + f(y0 + h + 40) + 'L7840 ' + CY, 1, FAR);
+    var vx = 6360, pr = proj(vx), s = '';
+    s += P('M5700 ' + EYE + 'H7020', 0.8, FAR);
+    var tr = ''; for (var x = 5720; x < 7000; x += 90) { var hh = 40 + (x * 7 % 30); tr += 'M' + (x + 30) + ' ' + EYE + 'v-' + f(hh * 0.4) + 'M' + x + ' ' + f(EYE - hh * 0.4) + 'c-8 -6 -6 -' + f(hh * 0.5) + ' 10 -' + f(hh * 0.55) + 'c4 -' + f(hh * 0.4) + ' 36 -' + f(hh * 0.4) + ' 40 0c16 4 18 ' + f(hh * 0.5) + ' 10 ' + f(hh * 0.55) + 'z'; }
+    s += P(tr, 0.7, FAR);
+    var x0 = 5800, x1 = 6920, z0 = 40, z1 = 560;
+    s += P(poly(pr, [[x0, FY, z0], [x1, FY, z0], [x1, FY, z1], [x0, FY, z1]], true), 1.4);
+    s += P(seg(pr, [6360, FY, z0], [6360, FY, z1]), 0.9);
+    var cc = ''; for (var a = 0; a <= 32; a++) { var ang = a / 32 * Math.PI * 2, q = pr(6360 + Math.cos(ang) * 110, FY, 300 + Math.sin(ang) * 110); cc += (a ? 'L' : 'M') + f(q[0]) + ' ' + f(q[1]); }
+    s += P(cc, 0.9);
+    s += P(poly(pr, [[x1, FY, 160], [x1 - 160, FY, 160], [x1 - 160, FY, 440], [x1, FY, 440]]), 0.9);
+    for (var st = 1; st < 8; st++) { var zz = z0 + (z1 - z0) * st / 8; s += P(seg(pr, [x0, FY, zz], [x1, FY, zz]), 0.3, FAR); }
+    for (var fx2 = x0; fx2 <= x1; fx2 += 40) s += P(seg(pr, [fx2, FY, 620], [fx2, FY - 60, 620]), 0.5, FAR);
+    s += P(seg(pr, [x0, FY - 50, 620], [x1, FY - 50, 620]) + seg(pr, [x0, FY - 30, 620], [x1, FY - 30, 620]), 0.5, FAR);
+    var gz0 = 220, gz1 = 380, gy = FY - 170, gx = 6910;
+    s += P(poly(pr, [[gx, FY, gz0], [gx, gy, gz0], [gx, gy, gz1], [gx, FY, gz1]]), 3, HI);
+    s += P(seg(pr, [gx, gy, gz0], [gx + 70, FY, gz0 + 10]) + seg(pr, [gx, gy, gz1], [gx + 70, FY, gz1 - 10]), 1);
+    var net = ''; for (var nz = gz0 + 16; nz < gz1; nz += 16) { var p1 = pr(gx, gy, nz), p2 = pr(gx + 70, FY, nz); net += 'M' + f(p1[0]) + ' ' + f(p1[1]) + 'L' + f(p2[0]) + ' ' + f(p2[1]); }
+    for (var ny = gy + 17; ny < FY; ny += 17) { var t = (ny - gy) / (FY - gy), p3 = pr(gx + 70 * t, ny, gz0), p4 = pr(gx + 70 * t, ny, gz1); net += 'M' + f(p3[0]) + ' ' + f(p3[1]) + 'L' + f(p4[0]) + ' ' + f(p4[1]); }
+    s += P(net, 0.4, FAR);
+    s += box(pr, vx, 5860, 6060, 610, 620, 120, 210, 1.4) + P(seg(pr, [5870, 620, 120], [5870, FY, 120]) + seg(pr, [6050, 620, 120], [6050, FY, 120]), 1.4);
+    var lp = pr(5920, 610, 150), sc = F / (F + 150);
+    s += '<g transform="translate(' + f(lp[0]) + ',' + f(lp[1]) + ') scale(' + f(sc) + ')">' + P('M0 0h70l-6 -48h-58zM6 -6h58', 1.4) + P('M100 0l6 -40h40l4 40z', 1.2) + P('M112 -30h26M112 -22h20M112 -14h24', 0.6) + '</g>';
+    var fl = pr(5820, FY, 160);
+    s += '<g transform="translate(' + f(fl[0]) + ',' + f(fl[1]) + ') scale(' + f(F / (F + 160)) + ')">' + P('M0 0v-150M0 -150l60 18l-60 18', 1.4) + T(10, -126, 13, 'FC', LN) + '</g>';
+    Z.pitch = s;
+    Z.goal = pr(6910, FY, 300);
   })();
 
-  // End: 7840 to 8600
+  // Garage: 7020..8720, swing doors on the left wall
+  var GVX = 7870, CARX = 8080, CARZ = 100;
   (function () {
-    var s = '';
-    s += P('M7860 ' + EYE + 'H8600', 0.6, FAR);
-    s += PF('M8300 ' + FY + 'V440h150V' + FY, 2.4, LN, SOFT);
-    s += P('M8316 ' + FY + 'V456h118V' + FY, 0.8, LN);
-    var rays = ''; for (var i = 0; i < 7; i++) rays += 'M' + (8320 + i * 18) + ' ' + FY + 'L' + (8240 + i * 40) + ' ' + (FY + 60);
-    s += P(rays, 0.4, FAR);
-    s += P('M7840 ' + FY + 'H8600', 2, LN);
-    Z.end = s;
+    var vx = GVX, pr = proj(vx), s = '';
+    s += room(vx, 7020, 8720, { tiles: true, doorL: true, doorR: true });
+    [7350, 7900, 8400].forEach(function (x) { s += P(poly(pr, [[x - 70, CY + 8, 220], [x + 70, CY + 8, 220], [x + 70, CY + 16, 220], [x - 70, CY + 16, 220]], true), 0.9) + P(seg(pr, [x - 50, CY, 220], [x - 50, CY + 8, 220]) + seg(pr, [x + 50, CY, 220], [x + 50, CY + 8, 220]), 0.6, FAR); });
+    // door frame on the left wall
+    s += P(poly(pr, [[7020, FY, 140], [7020, FY - 260, 140], [7020, FY - 260, 360], [7020, FY, 360]]), 1.6);
+    // pegboard and bench (workshop)
+    var pb = [[7080, 440, D], [7560, 440, D], [7560, 590, D], [7080, 590, D]];
+    s += P(poly(pr, pb, true), 1.2);
+    var holes = ''; for (var hx = 7100; hx < 7550; hx += 22) for (var hy = 452; hy < 585; hy += 22) { var hp = pr(hx, hy, D); holes += 'M' + f(hp[0]) + ' ' + f(hp[1]) + 'h0.8'; }
+    s += P(holes, 1.2, FAR);
+    function onWall(d0, x0, y0) { var o = pr(x0, y0, D), sc = F / (F + D); return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(sc) + ')">' + d0 + '</g>'; }
+    s += onWall(P('M0 0v70M-14 0h28v14h-28z', 2), 7120, 470) + onWall(P('M0 0l30 80M-6 -2l12 -4l4 10l-12 4z', 1.6), 7180, 465) + onWall(P('M0 0v80M-8 0a8 8 0 1 1 16 0M0 80l-6 6M0 80l6 6', 1.6), 7250, 465);
+    s += onWall(P('M0 0h70l10 30h-90zM-10 30h90M10 30v40', 1.6), 7330, 470) + onWall(P('M0 0v60M14 0v70M28 0v50M42 0v64M-4 -6h50', 1.6), 7440, 470) + onWall(P(cp(0, 0, 18) + 'M0 18v50', 1.6), 7530, 480);
+    s += box(pr, vx, 7070, 7570, 600, 616, 300, 470, 1.4) + P(seg(pr, [7090, 616, 300], [7090, FY, 300]) + seg(pr, [7550, 616, 300], [7550, FY, 300]) + seg(pr, [7090, 660, 300], [7550, 660, 300]), 1.4);
+    // projects on the bench
+    var bz = 330, bsc = F / (F + bz);
+    var nb = 0; function onBench(x, d0, label) { var o = pr(x, 600, bz); nb++; return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(bsc) + ')">' + d0 + '</g>' + T(o[0], o[1] + (nb % 2 ? 18 : 32), 10, label, HI, 'middle'); }
+    s += onBench(7140, P('M-40 0h80l-20 -50h-40zM-20 -50l20 -14l20 14M-40 0l40 -14l40 14M0 -14v-50M-50 -64h100', 1.4), 'Holographic email summariser');
+    s += onBench(7290, P('M-40 0v-40h80v40zM-40 -40l80 -24v24M-30 -10h20M20 -20a6 6 0 1 0 0.1 0', 1.4), 'Solar dryer');
+    s += onBench(7410, P('M-24 0v-34h48v34zM-30 -34l14 -30h44l-14 30zM24 -14q30 0 34 20M-10 -20h20', 1.4), 'Solar watering system');
+    s += onBench(7520, P('M-30 0v-70h60v70zM-24 -64h48v40h-48zM-10 -30v-14h20v14M-30 -10h60', 1.4), '3D printer');
+    // tyres and tool chest at the far end
+    for (var t = 0; t < 4; t++) { var tp = pr(8620, FY - t * 26, 380), sc2 = F / (F + 380); s += P(ep(tp[0], tp[1] - 13 * sc2, 46 * sc2, 13 * sc2), 1) + P(ep(tp[0], tp[1] - 13 * sc2, 26 * sc2, 7 * sc2), 0.6, FAR); }
+    s += box(pr, vx, 8380, 8520, 560, FY, 420, 500, 1.2);
+    for (var dr = 0; dr < 4; dr++) s += P(seg(pr, [8385, 580 + dr * 30, 420], [8515, 580 + dr * 30, 420]), 0.6);
+    var dp = pr(CARX, FY, 160); s += P(ep(dp[0], dp[1], 40, 6), 0.5, FAR);
+    Z.garage = s;
+    Z.holo = pr(7140, 600, bz).concat([bsc]);
   })();
+
+  // End: 8720..9500
+  Z.end = P('M8740 ' + EYE + 'H9500', 0.6, FAR) + P('M8720 ' + FY + 'H9500', 2) + (function () { var r = ''; for (var x = 8760; x < 9500; x += 40) r += 'M' + x + ' ' + (FY + 8) + 'h14'; return P(r, 0.6, FAR); })();
 
   // ---------- assemble ----------
-  var zones = [
-    ['garage', 0, 1700, Z.garage], ['yard', 1700, 3020, Z.yard], ['office', 3020, 4120, Z.office], ['hall', 4120, 4920, Z.hall],
-    ['site', 4920, 6320, Z.site], ['travel', 6320, 6720, Z.travel], ['dsm', 6720, 7840, Z.dsm], ['end', 7840, 8600, Z.end]];
+  var zones = [['office', 0, 1200], ['hall', 1200, 2200], ['site', 2200, 3600], ['fly1', 3600, 4100], ['dsm', 4100, 5220], ['fly2', 5220, 5700], ['pitch', 5700, 7020], ['garage', 7020, 8720], ['end', 8720, 9500]];
   var html = '';
-  zones.forEach(function (z) { html += '<g class="zone" data-x0="' + z[1] + '" data-x1="' + z[2] + '">' + z[3] + '</g>'; });
-  var ac = proj(850)(520, FY, 230), acs = F / (F + 230);
-  html += '<g class="zone" data-x0="0" data-x1="1700"><g transform="translate(' + f(ac[0] - 215 * acs) + ',' + f(ac[1]) + ') scale(' + f(acs) + ')">' +
-    '<g id="eng-side" opacity="0">' + engineSide() + '</g>' + Z.car + '<g id="bonnet">' + PF(bonnetPath(), 2.2, LN) + '</g></g></g>';
-  var bpt = [ac[0] + (380 - 215) * acs, ac[1] - 80 * acs];
-  html += '<g id="engline" opacity="0"><path d="M' + f(bpt[0]) + ' ' + f(bpt[1]) + 'L520 410M' + f(bpt[0]) + ' ' + f(bpt[1]) + 'L800 410" stroke="' + HI + '" stroke-width="1" stroke-dasharray="6 6" fill="none"/></g>';
-  html += '<g id="roller"></g>';
-  html += '<g id="mapz" class="zone fixed">' + Z.map + Z.mapBeams + '<g id="pins"></g></g>';
-  html += '<g id="hook"></g><g id="plane"></g><g id="fx"></g><g id="me"></g>';
-  html += '<g id="engbay" class="zone fixed" opacity="0">' + engineBay(150, -60, 960, 470) + '</g>';
-  html += '<g id="holo" class="zone fixed" opacity="0"></g>';
+  zones.forEach(function (z) { html += '<g class="zone" data-x0="' + z[1] + '" data-x1="' + z[2] + '">' + Z[z[0]] + '</g>'; });
+  var gp = proj(GVX), ac = gp(CARX, FY, CARZ), acs = F / (F + CARZ), carOX = ac[0] - 215 * acs, carOY = ac[1];
+  html += '<g class="zone" data-x0="7020" data-x1="8720"><g transform="translate(' + f(carOX) + ',' + f(carOY) + ') scale(' + f(acs) + ')"><g id="eng-side" opacity="0">' + P('M342 -84h60v-6h-60zM350 -90v-8h44v8M356 -98v-6h32v6M402 -86h12v20h-12', 1.1) + '</g>' + carBody() + '<g id="bonnet">' + PF('M333 -92L418 -76L418 -71L333 -87Z', 2.2) + '</g></g></g>';
+  html += '<g id="doors"></g>';
+  // map on the garage ceiling
+  var MAPX = GVX - 640, MAPY = -340, M = window.MAP, mk = 1280 / M.w, mh = M.h * mk;
+  html += '<g id="mapz" opacity="0"><rect x="' + (MAPX - 20) + '" y="' + (MAPY - 60) + '" width="1320" height="' + f(mh + 100) + '" fill="' + SOFT + '" stroke="' + LN + '" stroke-width="2.4"/>' +
+    '<text class="t" x="' + MAPX + '" y="' + (MAPY - 24) + '" font-size="18" fill="' + HI + '" font-weight="500">Where I have worked</text>' +
+    '<g transform="translate(' + MAPX + ',' + MAPY + ') scale(' + f(mk) + ')"><path d="' + M.d + '" stroke="' + LN + '" stroke-width="' + f(1.2 / mk) + '" fill="none"/></g><g id="pins"></g></g>';
+  // engine bay panel
+  var EX = CARX - 520, EY = -560, EW = 1040, EH = trH('engine', EW);
+  var callouts = [[1150, 335, 'Ultra Racing front strut bar', 1], [1520, 860, 'Cone filter and heat-wrapped intake', 1], [980, 790, 'Blue ignition leads', 0], [1095, 960, 'New distributor', 1], [740, 850, '4A-FE valve cover', 0], [470, 1110, 'New alternator', 0], [720, 1365, 'New radiator', 0], [1700, 1200, 'Battery with inline fuse', 1]];
+  var co = '';
+  callouts.forEach(function (c) {
+    var px = EX + c[0] / 2016 * EW, py = EY + c[1] / 1512 * EH, right = c[3], tx = right ? EX + EW - 20 : EX + 20, ty = py;
+    var tw = c[2].length * 8.6 + 16, bx = right ? tx - tw : tx;
+    co += '<path d="M' + f(px) + ' ' + f(py) + 'L' + f(right ? bx : bx + tw) + ' ' + f(ty) + '" stroke="' + HI + '" stroke-width="1.2" fill="none"/>' + '<circle cx="' + f(px) + '" cy="' + f(py) + '" r="4" fill="' + HI + '"/>';
+    co += '<rect x="' + f(bx) + '" y="' + f(ty - 15) + '" width="' + f(tw) + '" height="28" fill="' + INK + '" stroke="' + HI + '" stroke-width="1"/>' + '<text class="t" x="' + f(bx + 8) + '" y="' + f(ty + 5) + '" font-size="15" fill="' + HI + '">' + c[2] + '</text>';
+  });
+  html += '<g id="engbay" opacity="0"><rect x="' + (EX - 16) + '" y="' + (EY - 56) + '" width="' + (EW + 32) + '" height="' + f(EH + 72) + '" fill="' + INK + '" stroke="' + HI + '" stroke-width="2.6"/>' +
+    '<text class="t" x="' + (EX) + '" y="' + (EY - 20) + '" font-size="20" fill="' + HI + '" font-weight="500">My engine bay, traced from a photo</text>' + TRC('engine', EX, EY, EW, 1, LN, 'eng') + co + '</g>';
+  html += '<g id="plane"></g><g id="fx"></g><g id="me"></g><g id="fx2"></g>';
   svg.innerHTML = html;
 
-  var zoneEls = [].slice.call(svg.querySelectorAll('.zone:not(.fixed)'));
-  var reveal = zoneEls.map(function () { return 0; });
-  var mapEl = document.getElementById('mapz'), engEl = document.getElementById('engbay'), holoEl = document.getElementById('holo');
-  var meEl = document.getElementById('me'), fxEl = document.getElementById('fx'), rollerEl = document.getElementById('roller');
-  var bonnetEl = document.getElementById('bonnet'), engSide = document.getElementById('eng-side'), pinsEl = document.getElementById('pins');
-  var engLine = document.getElementById('engline'), hookEl = document.getElementById('hook'), planeEl = document.getElementById('plane');
+  var zoneEls = [].slice.call(svg.querySelectorAll('.zone')), reveal = zoneEls.map(function () { return 0; });
+  var $ = function (id) { return document.getElementById(id); };
+  [ 'plane', 'fx', 'fx2', 'me', 'doors', 'engbay' ].forEach(function (k) { $(k).style.setProperty('--r', 1); });
+  var mapEl = $('mapz'), engEl = $('engbay'), meEl = $('me'), fxEl = $('fx'), fx2El = $('fx2'), doorsEl = $('doors'), bonnetEl = $('bonnet'), engSide = $('eng-side'), pinsEl = $('pins'), planeEl = $('plane');
 
-  // ---------- character rig ----------
+  // ---------- figures ----------
   function capsule(ax, ay, bx, by, w) {
     var dx = bx - ax, dy = by - ay, L = Math.sqrt(dx * dx + dy * dy) || 1, nx = -dy / L * w / 2, ny = dx / L * w / 2, r = w / 2;
     return 'M' + f(ax + nx) + ' ' + f(ay + ny) + 'L' + f(bx + nx) + ' ' + f(by + ny) + 'A' + r + ' ' + r + ' 0 0 0 ' + f(bx - nx) + ' ' + f(by - ny) + 'L' + f(ax - nx) + ' ' + f(ay - ny) + 'A' + r + ' ' + r + ' 0 0 0 ' + f(ax + nx) + ' ' + f(ay + ny) + 'Z';
   }
   function rad(a) { return a * Math.PI / 180; }
-  function limb(sx, sy, a1, l1, a2, l2) {
-    var ex = sx + Math.sin(rad(a1)) * l1, ey = sy + Math.cos(rad(a1)) * l1;
-    var hx = ex + Math.sin(rad(a1 + a2)) * l2, hy = ey + Math.cos(rad(a1 + a2)) * l2;
-    return [ex, ey, hx, hy];
+  function limb(sx, sy, a1, l1, a2, l2) { var ex = sx + Math.sin(rad(a1)) * l1, ey = sy + Math.cos(rad(a1)) * l1; return [ex, ey, ex + Math.sin(rad(a1 + a2)) * l2, ey + Math.cos(rad(a1 + a2)) * l2]; }
+  function ik(sx, sy, tx, ty, l1, l2) {
+    var dx = tx - sx, dy = ty - sy, d = Math.sqrt(dx * dx + dy * dy);
+    d = Math.max(Math.abs(l1 - l2) + 1, Math.min(l1 + l2 - 0.5, d));
+    var phi = Math.atan2(dx, dy) * 180 / Math.PI;
+    var al = Math.acos((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d)) * 180 / Math.PI;
+    var be = Math.acos((l1 * l1 + l2 * l2 - d * d) / (2 * l1 * l2)) * 180 / Math.PI;
+    return [phi - al, 180 - be];
   }
-  function drawMe(o) {
-    // o: x,y,dir,scale,pose{sN,eN,sF,eF,hN,kN,hF,kF,head,lean},ppe
+  var SHY = -142, HIPY = -88;
+  function figure(o) {
     var p = o.pose, s = '', st = 'stroke="' + HI + '" fill="' + INK + '" stroke-linejoin="round"';
     function pa(d, w) { return '<path d="' + d + '" ' + st + ' stroke-width="' + (w || 1.8) + '"/>'; }
-    var hipY = -88, shY = -142;
-    // far leg
-    var fl = limb(-2, hipY, p.hF, 44, p.kF, 44);
-    s += pa(capsule(-2, hipY, fl[0], fl[1], 15) + capsule(fl[0], fl[1], fl[2], fl[3], 13), 1.4);
-    s += pa('M' + f(fl[2] - 6) + ' ' + f(fl[3] - 2) + 'h24q4 0 4 6h-28z', 1.4);
-    // far arm
-    var fa = limb(0, shY + 4, p.sF, 30, p.eF, 28);
-    s += pa(capsule(0, shY + 4, fa[0], fa[1], 10) + capsule(fa[0], fa[1], fa[2], fa[3], 8), 1.4);
-    // torso (polo)
-    var lean = p.lean || 0;
-    s += '<g transform="rotate(' + lean + ' 0 ' + hipY + ')">';
-    s += pa('M-13 ' + (shY + 2) + 'Q-15 -118 -12 ' + (hipY + 2) + 'H13Q16 -118 13 ' + (shY + 2) + 'Q0 ' + (shY - 6) + ' -13 ' + (shY + 2) + 'Z', 2);
-    s += '<path d="M-4 ' + (shY - 2) + 'l6 10l6 -10M2 ' + (shY + 8) + 'v14M-12 ' + (hipY + 4) + 'H13" stroke="' + HI + '" stroke-width="1.2" fill="none"/>';
-    s += '<path d="M1 ' + (shY + 13) + 'h2M1 ' + (shY + 19) + 'h2" stroke="' + HI + '" stroke-width="2" fill="none"/>';
-    if (o.ppe) {
-      s += '<path d="M-13 ' + (shY + 4) + 'L4 ' + (hipY - 6) + 'M13 ' + (shY + 4) + 'L4 ' + (hipY - 6) + 'M-12 -112H13M-12 -104H13" stroke="' + LN + '" stroke-width="3" fill="none"/>';
+    function ln(d, w, c) { return '<path d="' + d + '" stroke="' + (c || HI) + '" stroke-width="' + (w || 1.2) + '" fill="none"/>'; }
+    var shY = SHY, hipY = HIPY, uni = o.outfit === 'police', ppe = o.outfit === 'ppe';
+    if (o.front) {
+      var wv = o.wave || 0;
+      s += pa(capsule(-7, hipY, -8, -4, 15) + capsule(7, hipY, 8, -4, 15), 1.8) + pa('M-20 -4h16v6h-18zM4 -4h16l2 6h-18z', 1.6);
+      s += pa('M-20 ' + (shY + 2) + 'Q-22 -116 -16 ' + (hipY + 2) + 'H16Q22 -116 20 ' + (shY + 2) + 'Q0 ' + (shY - 6) + ' -20 ' + (shY + 2) + 'Z', 2);
+      s += ln('M-6 ' + (shY - 3) + 'l6 10l6 -10M0 ' + (shY + 7) + 'v16M-16 ' + (hipY + 4) + 'H16');
+      s += pa(capsule(-20, shY + 4, -27, shY + 36, 10) + capsule(-27, shY + 36, -27, shY + 64, 8), 1.8);
+      var a = 135 + Math.sin(wv) * 14, el = limb(20, shY + 4, a, 30, 0, 0);
+      var fa = limb(el[0], el[1], 180 + Math.sin(wv * 1.7) * 26, 26, 0, 0);
+      s += pa(capsule(20, shY + 4, el[0], el[1], 10) + capsule(el[0], el[1], fa[0], fa[1], 8), 1.8) + pa(cp(fa[0], fa[1], 5), 1.4);
+      s += pa('M-3 ' + (shY - 8) + 'v8h6v-8', 1.6) + pa(ep(0, shY - 22, 12, 14), 1.8);
+      s += '<path d="M-12 ' + (shY - 24) + 'q0 -16 12 -16q12 0 12 16q-6 -8 -12 -6q-6 -2 -12 6z" fill="' + HI + '"/>';
+      s += ln('M-5 ' + (shY - 21) + 'h0.5M5 ' + (shY - 21) + 'h0.5', 2.6) + ln('M-4 ' + (shY - 14) + 'q4 4 8 0', 1.2);
+      return { s: s, hand: [o.x + fa[0] * o.scale, o.y + fa[1] * o.scale], head: [o.x, o.y + (shY - 22) * o.scale] };
     }
-    // head
+    var fl = limb(-2, hipY, p.hF, 44, p.kF, 44);
+    s += pa(capsule(-2, hipY, fl[0], fl[1], 15) + capsule(fl[0], fl[1], fl[2], fl[3], 13), 1.4) + pa('M' + f(fl[2] - 6) + ' ' + f(fl[3] - 2) + 'h24q4 0 4 6h-28z', 1.4);
+    var fa2 = limb(0, shY + 4, p.sF, 30, p.eF, 28);
+    s += pa(capsule(0, shY + 4, fa2[0], fa2[1], 10) + capsule(fa2[0], fa2[1], fa2[2], fa2[3], 8), 1.4);
+    s += '<g transform="rotate(' + (p.lean || 0) + ' 0 ' + hipY + ')">';
+    s += pa('M-13 ' + (shY + 2) + 'Q-15 -118 -12 ' + (hipY + 2) + 'H13Q16 -118 13 ' + (shY + 2) + 'Q0 ' + (shY - 6) + ' -13 ' + (shY + 2) + 'Z', 2);
+    if (uni) s += ln('M-12 ' + (hipY - 2) + 'H13M-12 ' + (hipY - 6) + 'H13', 1.6) + ln('M3 ' + (shY + 12) + 'h9v9h-9zM-10 ' + (shY + 4) + 'h10', 1.1) + ln('M-6 ' + (shY - 2) + 'l6 8l6 -8', 1.2);
+    else s += ln('M-4 ' + (shY - 2) + 'l6 10l6 -10M2 ' + (shY + 8) + 'v14M-12 ' + (hipY + 4) + 'H13');
+    if (ppe) s += '<path d="M-13 ' + (shY + 4) + 'L4 ' + (hipY - 6) + 'M13 ' + (shY + 4) + 'L4 ' + (hipY - 6) + 'M-12 -112H13M-12 -104H13" stroke="' + LN + '" stroke-width="3" fill="none"/>';
     var hx = 2, hy = shY - 20;
     s += '<g transform="rotate(' + (p.head || 0) + ' 0 ' + (shY - 6) + ')">';
-    s += pa('M-3 ' + (shY - 8) + 'v8h8v-8', 1.6);
-    s += pa('M' + (hx - 11) + ' ' + hy + 'a11 12 0 1 1 22 0q0 6 -3 9l3 4l-4 1q-2 5 -9 4q-9 -1 -9 -18z', 1.8);
-    s += '<path d="M' + (hx - 12) + ' ' + (hy - 2) + 'q2 -14 14 -13q10 1 10 9q-8 -4 -14 0q-6 3 -10 4z" fill="' + HI + '" stroke="' + HI + '" stroke-width="1"/>';
+    s += pa('M-3 ' + (shY - 8) + 'v8h8v-8', 1.6) + pa('M' + (hx - 11) + ' ' + hy + 'a11 12 0 1 1 22 0q0 6 -3 9l3 4l-4 1q-2 5 -9 4q-9 -1 -9 -18z', 1.8);
+    if (!uni && !ppe) s += '<path d="M' + (hx - 12) + ' ' + (hy - 2) + 'q2 -14 14 -13q10 1 10 9q-8 -4 -14 0q-6 3 -10 4z" fill="' + HI + '" stroke="' + HI + '" stroke-width="1"/>';
     s += '<path d="M' + (hx + 7) + ' ' + (hy + 1) + 'h0.5" stroke="' + HI + '" stroke-width="2.4" stroke-linecap="round"/>';
-    if (o.ppe) s += '<path d="M' + (hx - 14) + ' ' + (hy - 4) + 'q0 -18 15 -18q15 0 15 18zM' + (hx - 16) + ' ' + (hy - 4) + 'h34" stroke="' + LN + '" stroke-width="2" fill="' + INK + '"/>';
+    if (ppe) s += '<path d="M' + (hx - 14) + ' ' + (hy - 4) + 'q0 -18 15 -18q15 0 15 18zM' + (hx - 16) + ' ' + (hy - 4) + 'h34" stroke="' + LN + '" stroke-width="2" fill="' + INK + '"/>';
+    if (uni) s += '<path d="M' + (hx - 13) + ' ' + (hy - 6) + 'q2 -14 15 -14q12 0 13 10l-28 4zM' + (hx - 6) + ' ' + (hy - 6) + 'q10 -2 24 2l-2 4q-12 -3 -22 -2zM' + (hx - 2) + ' ' + (hy - 14) + 'h4v4h-4z" stroke="' + HI + '" stroke-width="1.6" fill="' + INK + '"/>';
     s += '</g></g>';
-    // near leg
     var nl = limb(2, hipY, p.hN, 44, p.kN, 44);
-    s += pa(capsule(2, hipY, nl[0], nl[1], 16) + capsule(nl[0], nl[1], nl[2], nl[3], 14), 1.8);
-    s += '<path d="M' + f(2 + (nl[0] - 2) * 0.1) + ' ' + f(hipY + 6) + 'L' + f(nl[0]) + ' ' + f(nl[1]) + '" stroke="' + HI + '" stroke-width="0.6"/>';
-    s += pa('M' + f(nl[2] - 6) + ' ' + f(nl[3] - 2) + 'h24q5 0 5 7h-29z', 1.8);
-    // near arm with sleeve
+    s += pa(capsule(2, hipY, nl[0], nl[1], 16) + capsule(nl[0], nl[1], nl[2], nl[3], 14), 1.8) + pa('M' + f(nl[2] - 6) + ' ' + f(nl[3] - 2) + 'h24q5 0 5 7h-29z', 1.8);
     var na = limb(0, shY + 4, p.sN, 30, p.eN, 28);
     s += pa(capsule(0, shY + 4, na[0], na[1], 10) + capsule(na[0], na[1], na[2], na[3], 8), 1.8);
     var sl = limb(0, shY + 4, p.sN, 18, 0, 0);
-    s += pa(capsule(0, shY + 4, sl[0], sl[1], 15), 1.8);
-    s += pa(circlePath(na[2], na[3], 4.5), 1.4);
-    meEl.setAttribute('transform', 'translate(' + f(o.x) + ',' + f(o.y) + ') scale(' + f(o.dir * o.scale) + ',' + f(o.scale) + ')');
-    meEl.innerHTML = s;
-    return { hand: [o.x + o.dir * o.scale * na[2], o.y + o.scale * na[3]], foot: [o.x + o.dir * o.scale * nl[2], o.y + o.scale * nl[3]], head: [o.x + o.dir * o.scale * 2, o.y + o.scale * (shY - 20)] };
+    s += pa(capsule(0, shY + 4, sl[0], sl[1], 15), 1.8) + pa(cp(na[2], na[3], 4.5), 1.4);
+    if (uni) s += ln('M-6 ' + (shY + 4) + 'h12', 2.4);
+    var k = o.dir * o.scale;
+    return { s: s, hand: [o.x + k * na[2], o.y + o.scale * na[3]], hand2: [o.x + k * fa2[2], o.y + o.scale * fa2[3]], foot: [o.x + k * nl[2], o.y + o.scale * nl[3]], head: [o.x + k * 2, o.y + o.scale * (shY - 20)], nose: [o.x + k * 14, o.y + o.scale * (shY - 18)] };
+  }
+  function place(o) { return 'translate(' + f(o.x) + ',' + f(o.y) + ') scale(' + f(o.dir * o.scale) + ',' + f(o.scale) + ')'; }
+  // local coords for a world point, for IK
+  function toLocal(o, w) { return [(w[0] - o.x) / (o.dir * o.scale), (w[1] - o.y) / o.scale]; }
+  function reachPose(o, target, both, extra) {
+    var l = toLocal(o, target), a = ik(0, SHY + 4, l[0], l[1], 30, 28), r = { sN: a[0], eN: a[1] };
+    if (both) { var b = ik(0, SHY + 4, l[0] - 4, l[1] + 2, 30, 28); r.sF = b[0]; r.eF = b[1]; }
+    for (var q in extra) r[q] = extra[q];
+    return r;
   }
   var STAND = { sN: 4, eN: -8, sF: -4, eF: -8, hN: 2, kN: 0, hF: -2, kF: 0, head: 0, lean: 0 };
-  function walkPose(ph) {
-    var s = Math.sin(ph), c = Math.cos(ph);
-    return { sN: -22 * s, eN: -14 - 8 * Math.max(0, -s), sF: 22 * s, eF: -14 - 8 * Math.max(0, s), hN: 26 * s, kN: -Math.max(0, 40 * c) - 4, hF: -26 * s, kF: -Math.max(0, -40 * c) - 4, head: 0, lean: 3 };
-  }
-  function mix(a, b, t) { var o = {}; for (var k in a) o[k] = a[k] + ((b[k] === undefined ? a[k] : b[k]) - a[k]) * t; return o; }
+  function walkPose(ph) { var s = Math.sin(ph), c = Math.cos(ph); return { sN: -22 * s, eN: -14 - 8 * Math.max(0, -s), sF: 22 * s, eF: -14 - 8 * Math.max(0, s), hN: 26 * s, kN: -Math.max(0, 40 * c) - 4, hF: -26 * s, kF: -Math.max(0, -40 * c) - 4, head: 0, lean: 3 }; }
+  function mix(a, b, t) { var o = {}, k; for (k in a) o[k] = a[k]; for (k in b) o[k] = (a[k] === undefined ? STAND[k] || 0 : a[k]) + (b[k] - (a[k] === undefined ? STAND[k] || 0 : a[k])) * t; return o; }
   function sm(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
   function rng(t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function floorAt(vx, x, z) { var p = proj(vx)(x, FY, z); return { x: p[0], y: p[1], s: F / (F + z) }; }
+  function bottle(x, y, s, rot) { return '<g transform="translate(' + f(x) + ',' + f(y) + ') rotate(' + (rot || 0) + ') scale(' + f(s) + ')"><path d="M-7 12v-22h14v22zM-3 -10v-6h6v6zM-5 -16h10v-6h-10z" stroke="' + HI + '" stroke-width="1.6" fill="' + INK + '"/></g>'; }
+  function bubble(x, y, w, lines, think) {
+    var h = 24 + lines.length * 24, s = '<g class="bub">';
+    s += '<rect x="' + f(x) + '" y="' + f(y) + '" width="' + w + '" height="' + h + '" rx="' + (think ? 22 : 6) + '" fill="' + INK + '" stroke="' + HI + '" stroke-width="1.8"/>';
+    lines.forEach(function (l, i) { s += '<text class="t" x="' + f(x + 18) + '" y="' + f(y + 32 + i * 24) + '" font-size="' + (i ? 15 : 18) + '" fill="' + (i ? LN : HI) + '"' + (i ? '' : ' font-weight="500"') + '>' + l + '</text>'; });
+    return s + '</g>';
+  }
+
+  // bonnet geometry (car local to world)
+  function carPt(lx, ly) { return [carOX + lx * acs, carOY + ly * acs]; }
+  function bonnetEdge(a) { var r = rad(a), dx = 85, dy = 18; return carPt(333 + dx * Math.cos(r) + dy * Math.sin(r), -92 - dx * Math.sin(r) + dy * Math.cos(r)); }
+  var noseX = carPt(430, 0)[0] + 30;
+  var bonnetX = GVX + (noseX - GVX) / (F / (F + 60));
 
   // ---------- timeline ----------
-  // each stop: char x, z (depth on floor), camera x,y,w, dwell, action
-  var depth = function (vx, z) { return proj(vx); };
-  function floorAt(vx, x, z) { var p = proj(vx)(x, FY, z); return { x: p[0], y: p[1], s: F / (F + z) }; }
   var stops = [
-    { id: 'start', x: 760, vx: 850, z: 60, cam: [850, 380, 1700], dwell: 0.8 },
-    { id: 'garage', x: 820, vx: 850, z: 60, cam: [660, 'auto', 1000], dwell: 1 },
-    { id: 'bonnet', x: 905, vx: 850, z: 60, cam: [640, 300, 760], dwell: 2.2 },
-    { id: 'workshop', x: 1300, vx: 850, z: 60, cam: [1380, 'auto', 900], dwell: 1.6 },
-    { id: 'door', x: 1640, vx: 850, z: 60, cam: [1720, 'auto', 1000], dwell: 0.7 },
-    { id: 'pitch', x: 2100, vx: 2360, z: 60, cam: [2240, 'auto', 1100], dwell: 1.2 },
-    { id: 'kick', x: 2540, vx: 2360, z: 60, cam: [2620, 'auto', 1000], dwell: 1.2 },
-    { id: 'office', x: 3460, vx: 3570, z: 60, cam: [3520, 'auto', 1000], dwell: 1.8 },
-    { id: 'hall', x: 4520, vx: 4520, z: 60, cam: [4520, 'auto', 900], dwell: 1.4 },
-    { id: 'site', x: 5060, vx: 5620, z: 60, cam: [5480, 400, 1400], dwell: 1.6 },
-    { id: 'travel', x: 6420, vx: 6520, z: 40, cam: [6520, 520, 900], dwell: 0.5 },
-    { id: 'dsm', x: 6900, vx: 7280, z: 60, cam: [7280, 'auto', 1200], dwell: 2.4 },
-    { id: 'ceiling', x: 7300, vx: 7280, z: 60, cam: [7280, 10, 1500], dwell: 1.8 },
-    { id: 'bye', x: 8200, vx: 8200, z: 40, cam: [8240, 'auto', 900], dwell: 1.6 }];
+    { id: 'hello', x: 330, vx: 600, z: 60, cam: [90, 'auto', 1100], dwell: 1.4 },
+    { id: 'perfume', x: 640, vx: 600, z: 60, cam: [700, 'auto', 900], dwell: 2.4 },
+    { id: 'police', x: 1700, vx: 1700, z: 60, cam: [1700, 'auto', 860], dwell: 1.8 },
+    { id: 'site', x: 2330, vx: 2900, z: 60, cam: [2890, 380, 1500], dwell: 1.8 },
+    { id: 'fly1', x: 3850, vx: 3850, z: 60, cam: [3850, 440, 1000], dwell: 0.6 },
+    { id: 'dsm', x: 4280, vx: 4660, z: 60, cam: [4660, 'auto', 1250], dwell: 3 },
+    { id: 'fly2', x: 5450, vx: 5450, z: 60, cam: [5450, 440, 1000], dwell: 0.6 },
+    { id: 'pitch', x: 5950, vx: 6360, z: 60, cam: [6150, 'auto', 1200], dwell: 1.3 },
+    { id: 'kick', x: 6560, vx: 6360, z: 60, cam: [6600, 'auto', 1100], dwell: 2 },
+    { id: 'workshop', x: 7260, vx: GVX, z: 60, cam: [7300, 'auto', 900], dwell: 2 },
+    { id: 'bonnet', x: bonnetX, vx: GVX, z: 60, cam: [8150, 'auto', 1000], dwell: 3.2 },
+    { id: 'ceiling', x: bonnetX - 120, vx: GVX, z: 60, cam: [GVX, -10, 1500], dwell: 1.8 },
+    { id: 'bye', x: 9100, vx: 9100, z: 60, cam: [9150, 'auto', 1000], dwell: 2.6 }];
   var segs = [], total = 0;
   stops.forEach(function (st, i) {
-    if (i > 0) { var prev = stops[i - 1], len = Math.max(0.5, Math.abs(st.x - prev.x) / 650); if (st.id === 'ceiling') len = 0.9; if (st.id === 'travel' || st.id === 'dsm') len = Math.max(len, 0.8); segs.push({ type: 'walk', a: prev, b: st, start: total, len: len }); total += len; }
+    if (i > 0) { var pv = stops[i - 1], len = Math.max(0.5, Math.abs(st.x - pv.x) / 650); if (st.id === 'ceiling' || pv.id === 'ceiling') len = 0.9; segs.push({ type: 'walk', a: pv, b: st, start: total, len: len }); total += len; }
     segs.push({ type: 'dwell', st: st, start: total, len: st.dwell }); total += st.dwell;
   });
   walk.style.height = (total * 85 + 100) + 'vh';
 
   // ---------- cards ----------
   var CARDS = {
-    garage: ['My Toyota Corolla AE111', 'A 4A-FE, manual, past 314,000 km. I maintain and modify it myself.', 'ae111.html'],
-    bonnet: ['Under the bonnet', 'Timing chain, water pump, head gasket and radiator done. Strut bar and sport springs added.', 'ae111.html'],
-    workshop: ['Workshop', 'Where my SUTD builds happen. This is the holographic email notifier, using a Pepper’s Ghost display.', 'holographic.html'],
-    pitch: ['Vice president, SUTD Football Club', 'Fixtures, venue bookings, risk assessments, and new goalposts beyond our seed funding.', '#experience'],
-    office: ['Fragrance Castle', 'Developed with my family since 2019. E-commerce and sales on Shopee, Lazada and Shopify, retail and wholesale of Armaf and five more brands.', 'fragrance-castle.html'],
-    hall: ['Singapore Police Force', 'Two years as a field instructor. Trained 160+ officers, 79 of them on my own through a nine-month course.', '#experience'],
-    site: ['Ekosys', 'Project management and design engineering intern. Wrote ISO 9001 manuals and cut defect logging from 1 min to 20 s.', '#experience'],
-    dsm: ['dsm-firmenich, Shanghai and Guangzhou', 'Fragrance evaluations, candle testing, client visits and market research with the marketing team.', '#experience'],
-    ceiling: ['Where I have worked', 'Singapore, Shanghai, Guangzhou and Dubai, and building a network across Asia, the Middle East and Europe.', 'contact.html'],
-    bye: ['Thanks for walking through', 'Next up: business development intern at Shopee SPX Express, from January 2027.', '#about']
+    perfume: ['Fragrance Castle Singapore', 'Developed with my family since 2019. E-commerce and sales on Shopee, Lazada and Shopify, for retail and wholesale customers.', 'fragrance-castle.html'],
+    police: ['Singapore Police Force', 'Two years as a field instructor. I trained 160+ officers in fitness and drill, and gave the ORD ceremony speech.', 'experience.html#spf'],
+    site: ['Ekosys', 'Project management and design engineering intern. Wrote ISO 9001 manuals and cut defect logging from 1 min to 20 s.', 'experience.html#ekosys'],
+    dsm: ['dsm-firmenich, Shanghai and Guangzhou', 'Marketing intern. Fragrance evaluations, candle testing, client visits and market research.', 'experience.html#dsm'],
+    pitch: ['Vice president, SUTD Football Club', 'Fixtures, venue bookings, risk assessments, and new goalposts beyond our seed funding.', 'experience.html#football'],
+    workshop: ['My projects', 'The holographic email summariser, a solar dryer, a solar powered watering system and more, built at SUTD and at home.', 'projects.html'],
+    bonnet: ['Toyota Corolla AE111', 'A 4A-FE manual past 314,000 km. I maintain and modify it myself, from the timing chain to the strut bar.', 'ae111.html'],
+    ceiling: ['Where I have worked', 'Singapore, Shanghai, Guangzhou and Dubai, and building a network across Asia, the Middle East and Europe.', 'experience.html']
   };
   var cardEls = {};
   Object.keys(CARDS).forEach(function (k) {
     var c = CARDS[k], el = document.createElement('div');
     el.className = 'wcard';
-    var more = k === 'bye' ? 'Keep scrolling' : 'Read more';
-    el.innerHTML = '<p class="wc-t">' + c[0] + '</p><p class="wc-b">' + c[1] + '</p><a href="' + c[2] + '">' + more + '</a>';
+    el.innerHTML = '<p class="wc-t">' + c[0] + '</p><p class="wc-b">' + c[1] + '</p><a href="' + c[2] + '">Read more</a>';
     cardsEl.appendChild(el); cardEls[k] = el;
   });
 
   // ---------- frame ----------
-  var W = 0, H = 0, mobile = false;
+  var W = 0, H = 0, mobile = false, view = { x: 0, y: 0, w: 1, h: 1 };
   function resize() { var r = stage.getBoundingClientRect(); W = r.width; H = r.height; mobile = W < 760; svg.setAttribute('width', W); svg.setAttribute('height', H); }
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  var view = { x: 0, y: 0, w: 1, h: 1 };
-  function setCam(cx, cy, w) {
-    if (mobile) w = Math.max(w * 0.42, 360);
-    var h = w * H / W;
-    if (cy === 'auto') cy = FY + 16 - 0.3 * h;
-    view = { x: cx - w / 2, y: cy - h / 2, w: w, h: h };
-    svg.setAttribute('viewBox', f(view.x) + ' ' + f(view.y) + ' ' + f(w) + ' ' + f(h));
-  }
-  function camY(c) { if (c[1] !== 'auto') return c[1]; var w = mobile ? Math.max(c[2] * 0.42, 360) : c[2]; return FY + 16 - (mobile ? 0.36 : 0.3) * w * H / W; }
+  function camW(w) { return mobile ? Math.max(w * 0.42, 360) : w; }
+  function camY(c) { if (c[1] !== 'auto') return c[1]; return FY + 16 - (mobile ? 0.36 : 0.3) * camW(c[2]) * H / W; }
+  function setCam(cx, cy, w) { w = camW(w); var h = w * H / W; view = { x: cx - w / 2, y: cy - h / 2, w: w, h: h }; svg.setAttribute('viewBox', f(view.x) + ' ' + f(view.y) + ' ' + f(w) + ' ' + f(h)); }
   function toScreen(x, y) { return [(x - view.x) / view.w * W, (y - view.y) / view.h * H]; }
 
   function frame(u) {
-    var seg = segs[segs.length - 1], i;
-    for (i = 0; i < segs.length; i++) if (u < segs[i].start + segs[i].len) { seg = segs[i]; break; }
-    var t = Math.max(0, Math.min(1, (u - seg.start) / seg.len));
-    var st, x, cam, pose = STAND, dir = 1, vx, z;
-    if (seg.type === 'walk') {
-      var a = seg.a, b = seg.b, e = sm(t);
+    var sg = segs[segs.length - 1], i;
+    for (i = 0; i < segs.length; i++) if (u < segs[i].start + segs[i].len) { sg = segs[i]; break; }
+    var t = Math.max(0, Math.min(1, (u - sg.start) / sg.len));
+    var st, x, z, vx, cam, pose = STAND, dir = 1;
+    if (sg.type === 'walk') {
+      var a = sg.a, b = sg.b, e = sm(t);
       x = lerp(a.x, b.x, t); z = lerp(a.z, b.z, t); vx = t < 0.5 ? a.vx : b.vx;
-      var cw = lerp(a.cam[2], b.cam[2], e), ay = camY(a.cam), by = camY(b.cam);
-      cam = [lerp(a.cam[0], b.cam[0], e), lerp(ay, by, e), cw];
+      cam = [lerp(a.cam[0], b.cam[0], e), lerp(camY(a.cam), camY(b.cam), e), lerp(a.cam[2], b.cam[2], e)];
       dir = b.x >= a.x ? 1 : -1;
-      var moving = Math.abs(b.x - a.x) > 5;
-      pose = moving ? walkPose(x / 30) : STAND;
-      if (moving) pose = mix(STAND, pose, Math.min(1, t * 6, (1 - t) * 6));
+      if (Math.abs(b.x - a.x) > 5) pose = mix(STAND, walkPose(x / 30), Math.min(1, t * 6, (1 - t) * 6));
       if (b.id === 'ceiling') pose = mix(STAND, { head: -28 }, sm(t));
-      if (a.id === 'ceiling') pose = mix(mix(STAND, { head: -28 }, 1 - sm(t * 3)), pose, sm(t * 3));
+      if (a.id === 'ceiling') pose = mix(STAND, { head: -28 }, 1 - sm(t * 3));
       st = { id: '_walk', from: a.id, to: b.id };
-    } else {
-      st = seg.st; x = st.x; z = st.z; vx = st.vx; cam = [st.cam[0], camY(st.cam), st.cam[2]];
-    }
+    } else { st = sg.st; x = st.x; z = st.z; vx = st.vx; cam = [st.cam[0], camY(st.cam), st.cam[2]]; }
+    // walls between zones use the zone's own vanishing point
+    zones.forEach(function (zn) { if (x >= zn[1] && x < zn[2]) { var m = { office: 600, hall: 1700, site: 2900, dsm: 4660, pitch: 6360, garage: GVX }; if (m[zn[0]]) vx = m[zn[0]]; } });
     var fp = floorAt(vx, x, z);
-    var o = { x: fp.x, y: fp.y, dir: dir, scale: fp.s, pose: pose, ppe: x > 4940 && x < 6330 };
-    var id = st.id, fx = '';
+    var outfit = x >= 1200 && x < 2214 ? 'police' : x >= 2214 && x < 3600 ? 'ppe' : 'polo';
+    var o = { x: fp.x, y: fp.y, dir: dir, scale: fp.s, pose: pose, outfit: outfit };
+    var id = st.id, fx = '', fx2 = '', active = null, hidden = false;
+    var bonnetA = 0, engO = 0, holoO = 0, mapR = 0, doorOpen = sm(rng(x, 6900, 7060));
 
-    // reset dynamic bits
-    var bonnetA = 0, engO = 0, holoO = 0, rollerOpen = rng(x, 1500, 1640), mapR = 0;
-    var active = null;
-
-    if (id === 'start') { active = null; }
-    if (id === 'garage') { active = 'garage'; o.pose = mix(STAND, { sN: 10, eN: -30 }, sm(t * 2)); }
-    if (id === 'bonnet') {
-      active = t > 0.25 ? 'bonnet' : 'garage';
-      bonnetA = sm(rng(t, 0.02, 0.22)) * 52;
-      engO = sm(rng(t, 0.2, 0.36));
-      o.pose = mix(STAND, { sN: 165, eN: -10, sF: 150, eF: -10, lean: 4, head: -10 }, sm(rng(t, 0, 0.18)));
-      var c0 = st.cam;
-      var ce = sm(rng(t, 0.15, 0.4));
-      cam = [lerp(660, 630, ce), lerp(null === null ? 540 : 0, 200, ce), lerp(1000, 1060, ce)];
-      if (t > 0.9) { var bk = sm(rng(t, 0.9, 1)); cam = [lerp(630, 900, bk), lerp(200, 540, bk), lerp(1060, 1000, bk)]; engO *= 1 - bk; bonnetA *= 1 - bk; }
+    if (id === 'hello') { o.front = true; o.wave = u * 12; }
+    if (st.id === '_walk' && st.from === 'hello' && t < 0.15) { o.front = true; o.wave = u * 12; }
+    if (id === 'perfume') {
+      active = t > 0.15 ? 'perfume' : null;
+      var bt = Z.pickBottle, pr1 = rng(t, 0, 0.18), lift = sm(rng(t, 0.25, 0.45)), back = sm(rng(t, 0.85, 1));
+      var reachP = reachPose(o, [bt[0], bt[1] - 8], false, { lean: 8 });
+      var noseW;
+      o.pose = mix(STAND, reachP, sm(pr1));
+      var g0 = figure(o);
+      noseW = [g0.nose[0] + 6, g0.nose[1] + 4];
+      var held = [lerp(bt[0], noseW[0], lift), lerp(bt[1] - 8, noseW[1] + 10, lift)];
+      if (back > 0) held = [lerp(noseW[0], bt[0], back), lerp(noseW[1] + 10, bt[1] - 8, back)];
+      if (t > 0.18) { o.pose = mix(STAND, reachPose(o, held, false, { lean: 8 - 8 * lift + 8 * back, head: lift * (1 - back) * 6 }), 1); fx2 += bottle(held[0], held[1], o.scale, -10 * lift * (1 - back)); }
+      else fx += bottle(bt[0], bt[1] - 12, F / (F + 140), 0);
+      var mist = rng(t, 0.5, 0.72);
+      if (mist > 0 && mist < 1) { var mm = ''; for (var m = 0; m < 16; m++) { var rr = mist * 38 * ((m % 5) / 5 + 0.4); mm += cp(held[0] - o.dir * (10 + rr * Math.abs(Math.cos(m))), held[1] - 18 + rr * Math.sin(m * 2.3) * 0.5, 1.4); } fx2 += '<path d="' + mm + '" fill="' + HI + '" opacity="' + f(1 - mist) + '"/>'; }
     }
-    if (id === 'workshop') {
-      active = t > 0.2 ? 'workshop' : null;
-      o.pose = mix(STAND, { sN: 70, eN: -40, head: -6 }, sm(rng(t, 0, 0.2)));
-      holoO = sm(rng(t, 0.15, 0.35));
-    }
-    if (id === 'door') { rollerOpen = sm(t); }
-    if (id === 'pitch') { active = 'pitch'; o.pose = mix(STAND, { sN: 40, eN: -60 }, sm(rng(t, 0.1, 0.3))); }
-    if (id === 'kick') {
-      active = 'pitch';
-      var kt = rng(t, 0.1, 0.45);
-      o.pose = mix(STAND, { hN: kt < 0.5 ? -30 * sm(kt * 2) : lerp(-30, 70, sm((kt - 0.5) * 2)), kN: kt < 0.5 ? -60 * sm(kt * 2) : -60 + 60 * sm((kt - 0.5) * 2), sF: 30, sN: -30, lean: -4 }, sm(rng(t, 0, 0.1)) * (1 - sm(rng(t, 0.75, 0.95))));
-    }
-    if (id === 'office') {
-      active = t > 0.15 ? 'office' : null;
-      var sp = rng(t, 0.1, 0.5), sn = rng(t, 0.5, 0.8);
-      var spray = { sN: 110, eN: -40, head: -4 }, sniff = { sN: 140, eN: -120, head: 8, lean: 4 };
-      o.pose = mix(mix(STAND, spray, sm(sp * 2)), sniff, sm(sn));
-      o.dir = -1;
-    }
-    if (id === 'hall') { active = 'hall'; o.pose = mix(STAND, { head: -12, sN: 10 }, sm(rng(t, 0, 0.3))); o.dir = 1; }
+    if (id === 'police') { active = 'police'; o.pose = mix(STAND, { head: -12, sN: 10 }, sm(rng(t, 0, 0.3))); }
     if (id === 'site') { active = t > 0.15 ? 'site' : null; o.pose = mix(STAND, { head: -14, sN: 20, eN: -100, sF: -10 }, sm(rng(t, 0.1, 0.3))); }
+    var fl1 = x > 3610 && x < 4090, fl2 = x > 5230 && x < 5670;
+    if (fl1 || fl2) {
+      hidden = true;
+      var x0 = fl1 ? 3640 : 5240, x1 = fl1 ? 4060 : 5660, pt = Math.max(0, Math.min(1, (x - x0) / (x1 - x0)));
+      var px = lerp(x0, x1, pt), py = (1 - pt) * (1 - pt) * (FY - 40) + 2 * pt * (1 - pt) * (FY - 520) + pt * pt * (FY - 40);
+      var ang = Math.atan2(2 * (1 - pt) * (-480) + 2 * pt * 480, x1 - x0) * 180 / Math.PI;
+      planeEl.innerHTML = '<g transform="translate(' + f(px) + ',' + f(py - 14) + ') rotate(' + f(ang) + ') scale(1.5)">' + Z.plane + '</g>';
+      cam[0] = px; cam[1] = Math.min(cam[1], py + 40);
+    } else planeEl.innerHTML = '';
     if (id === 'dsm') {
       active = 'dsm';
-      var ph = Math.min(2, Math.floor(t * 3)), lt = t * 3 - ph;
-      var spots = [6880, 7300, 7640];
-      var fp2 = floorAt(vx, spots[ph], 60);
+      var ph = Math.min(2, Math.floor(t * 3)), lt = t * 3 - ph, spots = [4300, 4640, 5000], fp2 = floorAt(4660, spots[ph], 60);
       o.x = fp2.x; o.y = fp2.y; o.scale = fp2.s;
       var poses = [{ sN: 150, eN: -130, head: 6 }, { sN: 40, eN: -70, sF: 30, eF: -60 }, { sN: 80, eN: -60, head: -8, sF: 70, eF: -30 }];
       o.pose = mix(STAND, poses[ph], sm(rng(lt, 0, 0.25)) * (1 - sm(rng(lt, 0.85, 1))));
       o.dir = ph === 1 ? -1 : 1;
-      var trail = '';
-      if (lt < 0.2) { for (var tr = 1; tr < 4; tr++) trail += 'M' + f(o.x - tr * 22 - 10) + ' ' + f(o.y - 120 + tr * 18) + 'h-' + (40 - tr * 8); }
-      fx += '<path d="' + trail + '" stroke="' + HI + '" stroke-width="1.4" fill="none"/>';
-      var lbls = ['Smelling', 'Client meeting', 'Blending'];
-      fx += T(o.x, o.y - 210 * o.scale, 14, lbls[ph], HI, 'middle', 500);
+      if (lt < 0.2) { var tr = ''; for (var q = 1; q < 4; q++) tr += 'M' + f(o.x - q * 22 - 10) + ' ' + f(o.y - 120 + q * 18) + 'h-' + (40 - q * 8); fx += '<path d="' + tr + '" stroke="' + HI + '" stroke-width="1.4" fill="none"/>'; }
+      fx2 += T(o.x, o.y - 215 * o.scale, 15, ['Smelling, Shanghai', 'Client meeting, Shanghai', 'Blending, Guangzhou'][ph], HI, 'middle', 500);
     }
-    if (id === 'ceiling') {
-      active = t > 0.35 ? 'ceiling' : null;
-      o.pose = mix(STAND, { head: -28 }, 1);
-      mapR = sm(rng(t, 0, 0.5));
-    }
-    if (st.id === '_walk' && st.to === 'ceiling') { mapR = sm(t); }
-    if (st.id === '_walk' && st.from === 'ceiling') { mapR = 1 - sm(t * 2); }
-    if (id === 'bye') {
-      active = t > 0.15 ? 'bye' : null;
-      var wv = sm(rng(t, 0, 0.15));
-      o.pose = mix(STAND, { sN: 160 + Math.sin(t * 40) * 14, eN: -20 + Math.sin(t * 40) * 20 }, wv);
-      fx += P(circlePath(o.x + 40, o.y - 210, 4) + circlePath(o.x + 56, o.y - 236, 7), 1.2, HI);
-      if (t > 0.1) {
-        var bx = mobile ? o.x - 125 : o.x + 70, by = mobile ? o.y - 420 : o.y - 330;
-        fx += PF('M' + bx + ' ' + by + 'h250v80h-250z', 1.6, HI, INK) + T(bx + 14, by + 32, 18, 'Next: Shopee SPX Express', HI, 'start', 500) + T(bx + 14, by + 58, 14, 'Business development, Jan 2027', LN);
+    if (x > 4100 && x < 5220) { var cl = Z.clients; [[cl[0], 1], [cl[1], -1]].forEach(function (c2) { fx += '<g transform="' + place({ x: c2[0][0], y: c2[0][1], dir: c2[1], scale: cl[2] }) + '">' + figure({ x: 0, y: 0, dir: 1, scale: 1, pose: STAND, outfit: 'polo' }).s + '</g>'; }); }
+    // football
+    if (x > 5700 && x < 7020) {
+      var pls = [floorAt(6360, 6300, 260), floorAt(6360, 6480, 200)], bp = null, gl = Z.goal;
+      var kt = id === 'kick' ? t : (st.id === '_walk' && st.from === 'kick') ? 1 : -1;
+      var passer = 1, pass2me = kt >= 0 ? sm(rng(kt, 0.05, 0.3)) : 0;
+      var rot = (u * 3) % 2, pp = sm(rot < 1 ? rot : 2 - rot);
+      pls.forEach(function (pl, n) {
+        var run = n === passer && kt >= 0 && kt < 0.08 ? { hN: 40, kN: -40, lean: -4 } : STAND;
+        fx += '<g transform="' + place({ x: pl.x, y: pl.y, dir: n ? -1 : 1, scale: pl.s }) + '">' + figure({ x: 0, y: 0, dir: 1, scale: 1, pose: mix(STAND, run, 1), outfit: 'polo' }).s + '</g>';
+      });
+      if (kt < 0) bp = [lerp(pls[0].x + 14, pls[1].x - 14, pp), lerp(pls[0].y - 8, pls[1].y - 8, pp) - Math.sin(pp * Math.PI) * 20];
+      else {
+        var myFoot = [o.x + 18, o.y - 10], shot = sm(rng(kt, 0.45, 0.78));
+        if (kt < 0.4) bp = [lerp(pls[1].x - 14, myFoot[0], pass2me), lerp(pls[1].y - 8, myFoot[1], pass2me)];
+        else bp = [lerp(myFoot[0], gl[0] - 20, shot), lerp(myFoot[1], gl[1] - 70, shot) - Math.sin(shot * Math.PI) * 110];
+        if (kt > 0.3 && kt < 0.7) { var k2 = rng(kt, 0.32, 0.5); o.pose = mix(STAND, { hN: k2 < 0.5 ? -30 * sm(k2 * 2) : lerp(-30, 70, sm((k2 - 0.5) * 2)), kN: k2 < 0.5 ? -60 * sm(k2 * 2) : -60 + 60 * sm((k2 - 0.5) * 2), sF: 30, sN: -30, lean: -4 }, 1 - sm(rng(kt, 0.6, 0.7))); }
+        if (kt > 0.8 && id === 'kick') fx2 += T(gl[0] - 40, gl[1] - 210, 26, 'Goal', HI, 'middle', 500);
       }
+      fx2 += '<circle cx="' + f(bp[0]) + '" cy="' + f(bp[1]) + '" r="11" fill="' + INK + '" stroke="' + HI + '" stroke-width="1.8"/>';
     }
-    if (st.id === '_walk' && st.from === 'office') o.dir = 1;
+    if (id === 'pitch') { active = 'pitch'; o.pose = mix(STAND, { sN: 40, eN: -60 }, sm(rng(t, 0.1, 0.3))); }
+    if (id === 'kick') active = t > 0.85 ? 'pitch' : null;
+    if (id === 'workshop') {
+      active = t > 0.25 ? 'workshop' : null;
+      var hb = Z.holo;
+      o.pose = mix(STAND, reachPose(o, [hb[0] + 30, hb[1] - 30], false, { head: -6, lean: 4 }), sm(rng(t, 0, 0.2)) * (1 - sm(rng(t, 0.85, 1))));
+      holoO = sm(rng(t, 0.15, 0.32));
+    }
+    if (id === 'bonnet') {
+      o.dir = -1;
+      var r1 = sm(rng(t, 0, 0.12)), lf = sm(rng(t, 0.12, 0.3)), cl2 = sm(rng(t, 0.88, 1));
+      bonnetA = 56 * lf * (1 - cl2);
+      var edge = bonnetEdge(bonnetA);
+      var lean = 14 * (1 - lf) + 14 * cl2;
+      o.pose = mix(STAND, reachPose(o, [edge[0] + 2, edge[1] + 2], true, { lean: lean, head: -6 * lf }), r1);
+      engO = sm(rng(t, 0.3, 0.42)) * (1 - sm(rng(t, 0.8, 0.88)));
+      if (engO > 0) { var ec = [CARX, -560 + EH / 2 - 30, 1560]; cam = [lerp(cam[0], ec[0], engO), lerp(cam[1], ec[1], engO), lerp(cam[2], mobile ? 2600 : ec[2], engO)]; }
+      active = t > 0.3 && t < 0.88 ? 'bonnet' : null;
+    }
+    if (id === 'ceiling') { active = t > 0.35 ? 'ceiling' : null; o.pose = mix(STAND, { head: -28 }, 1); mapR = sm(rng(t, 0, 0.4)); }
+    if (st.id === '_walk' && st.to === 'ceiling') mapR = sm(rng(t, 0.4, 1));
+    if (st.id === '_walk' && st.from === 'ceiling') mapR = 1 - sm(t * 3);
+    if (id === 'bye') {
+      o.front = true; o.wave = u * 12;
+      var bx = mobile ? o.x - 150 : o.x + 50;
+      fx2 += bubble(bx, o.y - 330, 300, ['Thanks for walking through.', 'Scroll down for the details.'], false);
+      if (t > 0.45) fx2 += '<g opacity="' + f(sm(rng(t, 0.45, 0.6))) + '">' + P(cp(o.x - 40, o.y - 210, 4) + cp(o.x - 58, o.y - 236, 7), 1.2, HI) + bubble(mobile ? o.x - 150 : o.x - 380, mobile ? o.y - 450 : o.y - 340, mobile ? 300 : 330, ['Next: Shopee SPX Express', 'Business development, Jan 2027'], true) + '</g>';
+    }
+    if (id === 'hello') fx2 += bubble(mobile ? o.x - 145 : o.x + 40, o.y - 320, 290, ["Hi, I'm Sanjith.", 'Scroll to walk through my work.'], false);
 
-    // effects
-    if (id === 'office') {
-      var spt = rng(t, 0.25, 0.55);
-      if (spt > 0 && spt < 1) { var h0 = o.x + o.dir * 40, mist = ''; for (var m = 0; m < 14; m++) { var rr = spt * 60 * ((m % 5) / 5 + 0.4); mist += circlePath(h0 + o.dir * rr * Math.cos(m), o.y - 150 + rr * Math.sin(m * 2.3) * 0.5, 1.4); } fx += '<path d="' + mist + '" fill="' + HI + '" stroke="none" opacity="' + f(1 - spt) + '"/>'; }
+    if (mobile && !hidden && engO < 0.05 && id !== 'ceiling' && !(st.id === '_walk' && (st.to === 'ceiling' || st.from === 'ceiling'))) cam[0] = cam[0] * 0.25 + o.x * 0.75;
+    // draw
+    if (hidden) meEl.innerHTML = '';
+    else { var g = figure(o); meEl.innerHTML = g.s; meEl.setAttribute('transform', o.front ? 'translate(' + f(o.x) + ',' + f(o.y) + ') scale(' + f(o.scale) + ')' : place(o)); }
+    if (holoO > 0) {
+      var hp = Z.holo, hs = hp[2] * 1.6, blink = 0.6 + 0.4 * Math.sin(u * 30);
+      fx2 += '<g opacity="' + f(holoO) + '" transform="translate(' + f(hp[0]) + ',' + f(hp[1] - 70 * hp[2]) + ') scale(' + f(hs) + ')">' + '<path d="M-14 -10h28v18h-28zM-14 -10l14 10l14 -10" stroke="' + HI + '" stroke-width="1.4" fill="none" opacity="' + f(blink) + '"/>' + '</g>';
+      fx2 += '<g opacity="' + f(holoO) + '">' + bubble(hp[0] - 120, hp[1] - 190, 240, ['Inbox summary', '3 new, 1 urgent'], false) + '<path d="M' + f(hp[0]) + ' ' + f(hp[1] - 118) + 'v26" stroke="' + HI + '" stroke-dasharray="3 4"/></g>';
     }
-    if (id === 'kick' || (st.id === '_walk' && st.from === 'kick')) {
-      var bt = id === 'kick' ? sm(rng(t, 0.4, 0.8)) : 1;
-      var start = floorAt(2360, 2580, 60), goal = floorAt(2360, 2880, 300);
-      var bxp = lerp(start.x, goal.x, bt), byp = lerp(start.y - 12, goal.y - 60, bt) - Math.sin(bt * Math.PI) * 120;
-      fx += PF(circlePath(bxp, byp, 12 * lerp(1, goal.s / start.s, bt)), 1.6, HI);
-      if (bt > 0.98 && id === 'kick') fx += T(goal.x, goal.y - 200, 20, 'Goal', HI, 'middle', 500);
-    } else if (x < 2580 && x > 1700) {
-      var bs = floorAt(2360, 2580, 60); fx += PF(circlePath(bs.x, bs.y - 12, 12), 1.6, HI);
-    }
-
-    if (mobile && id !== 'bonnet' && id !== 'ceiling' && !(st.id === '_walk' && (st.to === 'ceiling' || st.from === 'ceiling'))) cam[0] = cam[0] * 0.3 + o.x * 0.7;
-    if (mobile && id === 'bonnet' && engO > 0.5) { cam[0] = 470; cam[2] = Math.max(cam[2], 1500); }
-    drawMe(o);
-    fxEl.innerHTML = fx;
-    fxEl.style.setProperty('--r', 1);
+    fxEl.innerHTML = fx; fx2El.innerHTML = fx2;
     setCam(cam[0], cam[1], cam[2]);
-
-    // bonnet and engine bay
     bonnetEl.setAttribute('transform', 'rotate(' + f(-bonnetA) + ' 333 -92)');
     engSide.setAttribute('opacity', f(Math.min(1, bonnetA / 30)));
     engEl.setAttribute('opacity', f(engO));
-    engLine.setAttribute('opacity', f(engO));
-    engEl.style.setProperty('--r', f(engO));
-    // holo
-    if (holoO > 0) {
-      var hp = proj(850)(1340, 600, 330), hs = F / (F + 330) * 1.7;
-      holoEl.innerHTML = '<g transform="translate(' + f(hp[0]) + ',' + f(hp[1]) + ') scale(' + f(hs) + ')">' +
-        P('M-40 0h80l-20 -50h-40zM-20 -50l20 -14l20 14M-40 0l40 -14l40 14M0 -14v-50', 1.4, HI) +
-        PF('M-50 -64h100v6h-100z', 1.4, LN) + '<g opacity="' + f(0.5 + 0.5 * Math.sin(u * 30)) + '">' + P('M-12 -34h24v14h-24zM-12 -34l12 8l12 -8', 1.2, HI) + '</g>' +
-        '<path d="M0 -70v-60" stroke="' + HI + '" stroke-width="0.8" stroke-dasharray="4 4"/>' + '</g>';
-    }
-    holoEl.setAttribute('opacity', f(holoO));
-    holoEl.style.setProperty('--r', f(holoO));
-    // roller door on garage right wall (section view)
-    var rTop = CY, rBot = FY, openH = (rBot - rTop - 30) * rollerOpen, rd = '';
-    for (var yy = rTop + 30 + openH; yy < rBot; yy += 22) rd += 'M1700 ' + f(yy) + 'h14';
-    rollerEl.innerHTML = P('M1700 ' + f(rTop + 30 + openH) + 'V' + rBot + 'M1714 ' + f(rTop + 30 + openH) + 'V' + rBot, 2, LN) + P(rd, 1, LN) + PF(circlePath(1707, rTop + 18, 14), 2, LN);
-    rollerEl.style.setProperty('--r', 1);
-    // crane hook sway
-    var hk = Z.craneHook, sw = Math.sin(u * 3) * 40;
-    hookEl.innerHTML = P('M' + f(hk[0] + sw) + ' ' + f(hk[1]) + 'v' + f(140 + Math.sin(u * 2) * 40) + 'm-6 0h12l-6 12z', 1, LN);
-    hookEl.style.setProperty('--r', 1);
-    // plane during travel
-    if ((st.id === '_walk' && st.to === 'travel') || id === 'travel' || (st.id === '_walk' && st.to === 'dsm')) {
-      var pt = id === 'travel' ? 0.5 : (st.to === 'travel' ? t * 0.5 : 0.5 + t * 0.5);
-      var px = lerp(6340, 6700, pt), py = 640 - Math.sin(pt * Math.PI / 2) * 340;
-      planeEl.innerHTML = '<g transform="translate(' + f(px) + ',' + f(py) + ') rotate(-24) scale(1.4)">' + Z.plane + '</g>';
-      planeEl.style.setProperty('--r', 1);
-    } else planeEl.innerHTML = '';
-    // map
-    mapEl.style.setProperty('--r', f(mapR));
-    mapEl.setAttribute('opacity', f(Math.min(1, mapR * 4)));
-    if (mapR > 0.4) {
-      var g = Z.mapGeo, pins = '', sg = g.c.Singapore, home = [g.x0 + sg[0] * g.k, g.y0 + sg[1] * g.k];
+    // inward opening doors on the garage left wall
+    var gpz = proj(GVX), dd = '', th = rad(80 * doorOpen);
+    [[140, 1], [360, -1]].forEach(function (lf2) {
+      var zh = lf2[0], sgn = lf2[1], L = 110, xf = 7020 + Math.sin(th) * L, zf = zh + sgn * Math.cos(th) * L;
+      dd += P(poly(gpz, [[7020, FY, zh], [7020, FY - 260, zh], [xf, FY - 260, zf], [xf, FY, zf]], true), 1.6, LN);
+      dd += P(seg(gpz, [7020 + Math.sin(th) * L * 0.5, FY - 250, zh + sgn * Math.cos(th) * L * 0.5], [7020 + Math.sin(th) * L * 0.5, FY - 10, zh + sgn * Math.cos(th) * L * 0.5]), 0.6);
+    });
+    doorsEl.innerHTML = dd; doorsEl.style.setProperty('--r', 1);
+    // map, faded in, pins after
+    mapEl.setAttribute('opacity', f(mapR));
+    if (mapR > 0.6) {
+      var pins = '', c = M.c, home = [MAPX + c.Singapore[0] * mk, MAPY + c.Singapore[1] * mk], pr2 = sm(rng(mapR, 0.6, 1));
       var labels = { Singapore: 'Singapore, home base', Shanghai: 'Shanghai', Guangzhou: 'Guangzhou', Dubai: 'Dubai, Beautyworld' };
-      var pr2 = sm(rng(mapR, 0.4, 1));
-      Object.keys(g.c).forEach(function (k, idx) {
-        var c = [g.x0 + g.c[k][0] * g.k, g.y0 + g.c[k][1] * g.k];
-        if (k !== 'Singapore') { var mx = (home[0] + c[0]) / 2, my = Math.min(home[1], c[1]) - 120; pins += '<path d="M' + f(home[0]) + ' ' + f(home[1]) + 'Q' + f(mx) + ' ' + f(my) + ' ' + f(c[0]) + ' ' + f(c[1]) + '" stroke="' + HI + '" stroke-width="1.4" fill="none" stroke-dasharray="6 6" opacity="' + f(pr2) + '"/>'; }
-        pins += '<circle cx="' + f(c[0]) + '" cy="' + f(c[1]) + '" r="' + f(8 * pr2) + '" fill="' + HI + '"/>';
-        var dxl = k === 'Guangzhou' ? -14 : 14, anc = k === 'Guangzhou' ? 'end' : 'start';
-        pins += '<text class="t" x="' + f(c[0] + dxl) + '" y="' + f(c[1] + 5) + '" font-size="17" fill="' + HI + '" text-anchor="' + anc + '" opacity="' + f(pr2) + '">' + labels[k] + '</text>';
+      Object.keys(c).forEach(function (kk) {
+        var cc = [MAPX + c[kk][0] * mk, MAPY + c[kk][1] * mk];
+        if (kk !== 'Singapore') pins += '<path d="M' + f(home[0]) + ' ' + f(home[1]) + 'Q' + f((home[0] + cc[0]) / 2) + ' ' + f(Math.min(home[1], cc[1]) - 120) + ' ' + f(cc[0]) + ' ' + f(cc[1]) + '" stroke="' + HI + '" stroke-width="1.4" fill="none" stroke-dasharray="6 6" opacity="' + f(pr2) + '"/>';
+        pins += '<circle cx="' + f(cc[0]) + '" cy="' + f(cc[1]) + '" r="' + f(8 * pr2) + '" fill="' + HI + '"/>';
+        var left = kk === 'Guangzhou';
+        pins += '<text x="' + f(cc[0] + (left ? -14 : 14)) + '" y="' + f(cc[1] + 5) + '" font-size="17" fill="' + HI + '" text-anchor="' + (left ? 'end' : 'start') + '" opacity="' + f(pr2) + '" font-family="Hanken Grotesk, sans-serif">' + labels[kk] + '</text>';
       });
       pinsEl.innerHTML = pins;
     } else pinsEl.innerHTML = '';
-
     // reveal drawings near the camera
     var cxm = view.x + view.w / 2;
-    zoneEls.forEach(function (el, i2) {
-      var x0 = +el.dataset.x0, x1 = +el.dataset.x1;
-      var dist = cxm < x0 ? x0 - cxm : cxm > x1 ? cxm - x1 : 0;
+    zoneEls.forEach(function (el, n) {
+      var a0 = +el.dataset.x0, a1 = +el.dataset.x1, dist = cxm < a0 ? a0 - cxm : cxm > a1 ? cxm - a1 : 0;
       var r = 1 - Math.max(0, Math.min(1, (dist - view.w * 0.2) / (view.w * 0.5)));
-      if (r > reveal[i2]) reveal[i2] = r;
-      el.style.setProperty('--r', f(sm(reveal[i2])));
+      if (r > reveal[n]) reveal[n] = r;
+      el.style.setProperty('--r', f(sm(reveal[n])));
     });
-
     // cards
     Object.keys(cardEls).forEach(function (k) {
       var el = cardEls[k], on = active === k;
       el.classList.toggle('on', on);
-      if (on) {
-        var anchor;
-        if (mobile) { el.style.left = '50%'; el.style.top = 'auto'; el.style.bottom = '20px'; return; }
-        anchor = toScreen(o.x, o.y - 260 * o.scale);
-        if (k === 'bonnet') anchor = [W * 0.86, H + 40];
-        if (k === 'ceiling') anchor = [W * 0.5, H * 0.82];
-        if (k === 'bye') anchor = toScreen(o.x - 240, o.y - 120);
-        if (k === 'workshop') anchor = toScreen(proj(850)(1340, 600, 330)[0], 470);
-        var lx = Math.max(20, Math.min(W - 360, anchor[0] - 170)), ly = Math.max(80, Math.min(H - 200, anchor[1] - 150));
-        el.style.left = lx + 'px'; el.style.top = ly + 'px'; el.style.bottom = 'auto';
-      }
+      if (!on) return;
+      if (mobile) { el.style.top = 'auto'; el.style.bottom = '20px'; return; }
+      var an = toScreen(o.x, o.y - 270 * o.scale);
+      if (k === 'bonnet') an = [W * 0.84, H + 30];
+      if (k === 'ceiling') an = [W * 0.2, H * 0.84];
+      if (k === 'workshop') an = toScreen(Z.holo[0] + 300, Z.holo[1] - 80);
+      if (k === 'site') an = toScreen(o.x + 120, o.y - 200);
+      var lx = Math.max(20, Math.min(W - 360, an[0] - 170)), ly = Math.max(80, Math.min(H - 200, an[1] - 150));
+      el.style.left = lx + 'px'; el.style.top = ly + 'px'; el.style.bottom = 'auto';
     });
-    if (heroEl) heroEl.style.opacity = f(1 - sm(u / 0.5));
+    if (heroEl) heroEl.style.opacity = f(1 - sm(u / 0.6));
     if (barEl) barEl.style.transform = 'scaleX(' + f(u / total) + ')';
   }
 
   var ticking = false, lastU = -1;
-  function progress() {
-    var r = walk.getBoundingClientRect(), span = r.height - window.innerHeight;
-    return Math.max(0, Math.min(1, -r.top / span)) * total;
-  }
+  function progress() { var r = walk.getBoundingClientRect(), span = r.height - window.innerHeight; return Math.max(0, Math.min(1, -r.top / span)) * total; }
   function tick() { ticking = false; var u = progress(); if (Math.abs(u - lastU) > 0.0005) { lastU = u; frame(u); } }
   window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(tick); } }, { passive: true });
   window.addEventListener('resize', function () { resize(); lastU = -1; tick(); });
