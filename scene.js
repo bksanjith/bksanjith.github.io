@@ -74,7 +74,7 @@
     var vx = 600, pr = proj(vx), s = '';
     s += room(vx, 0, 1200, { boards: 12, doorR: true });
     s += P(poly(pr, [[50, 440, D], [210, 440, D], [210, 560, D], [50, 560, D]], true) + seg(pr, [130, 440, D], [130, 560, D]), 1);
-    var sg = pr(800, 425, D); s += T(sg[0], sg[1], 22, 'Fragrance Castle Singapore', HI, 'middle', 500);
+    var sg = pr(1000, 425, D); s += T(sg[0], sg[1], 22, 'Fragrance Castle Singapore', HI, 'middle', 500);
     var shelves = [480, 540, 600], sc = F / (F + D - 20);
     shelves.forEach(function (y) { s += P(seg(pr, [420, y, D], [1170, y, D]), 1.2) + P(seg(pr, [420, y, D - 40], [1170, y, D - 40]) + seg(pr, [420, y, D], [420, y, D - 40]), 0.8); });
     var shapes = [
@@ -87,7 +87,7 @@
     s += box(pr, vx, 70, 380, 610, 624, 160, 270, 1.5) + P(seg(pr, [80, 624, 160], [80, FY, 160]) + seg(pr, [370, 624, 160], [370, FY, 160]), 1.5);
     var mp = pr(150, 610, 220), ms = F / (F + 220);
     s += '<g transform="translate(' + f(mp[0]) + ',' + f(mp[1]) + ') scale(' + f(ms) + ')">' + PF('M-6 -110h150v86h-150z', 1.6) + P('M66 -24v20M44 -4h44', 1.6) + P('M6 -96h36M6 -86h28M6 -76h32', 0.8) + P('M60 -40v-20M74 -40v-34M88 -40v-28M102 -40v-46M116 -40v-38', 2) + PF('M170 -4h50v-34h-50z', 1.4) + P('M178 -38v-6h34v6M182 -4l4 10h18l4 -10', 1) + '</g>';
-    s += T(mp[0] + 4, mp[1] - 118 * ms, 10, 'Shopee, Lazada, Shopify', FAR);
+    s += T(mp[0] + 4, mp[1] - 118 * ms, 13, 'Shopee, Lazada, Shopify', LN);
     // display counter
     s += box(pr, vx, 690, 1010, 600, FY, 100, 190, 1.5);
     var cb = ''; [770, 820, 870, 930, 980].forEach(function (x, i) { var p = pr(x, 600, 140); cb += '<g transform="translate(' + f(p[0]) + ',' + f(p[1]) + ') scale(' + f(F / (F + 140)) + ')">' + P(shapes[i % 4](), 1.3) + '</g>'; });
@@ -102,25 +102,91 @@
   (function () {
     var vx = 1700, dd = 220, pr = function (x, y, z) { var s = F / (F + z); return [vx + (x - vx) * s, EYE + (y - EYE) * s]; }, s = '';
     s += room(vx, 1200, 2200, { boards: 8, depth: dd, doorL: true, doorR: true });
-    var k = F / (F + dd), frames = [['fitness', 1300, 'Fitness training'], ['drill', 1650, 'Drill'], ['ord', 1980, 'ORD speech']];
+    var frames = [['tour-fitness.jpg', 1338, 230, 700 / 525, 'Fitness training'], ['tour-drill.jpg', 1740, 230, 700 / 341, 'Drill'], ['tour-ord.jpg', 2040, 140, 504 / 700, 'ORD speech']];
     frames.forEach(function (fr) {
-      var p = pr(fr[1], 470, dd), w = fr[0] === 'ord' ? 150 : 260 * k * 1.05, h = trH(fr[0], w);
-      if (fr[0] === 'ord') { w = 150; h = trH('ord', 150); }
-      var x = p[0] - w / 2, y = 470 + (fr[0] === 'drill' ? 25 : 0);
-      s += PF('M' + f(x - 10) + ' ' + f(y - 10) + 'h' + f(w + 20) + 'v' + f(h + 20) + 'h' + f(-(w + 20)) + 'Z', 2, LN);
-      s += TRC(fr[0], x, y, w, 0.7, LN);
-      s += T(x + w / 2, y - 22, 13, fr[2], LN, 'middle');
+      var p = pr(fr[1], 470, dd), w = fr[2], h = w / fr[3], x = p[0] - w / 2, y = 455 + (fr[0] === 'tour-drill.jpg' ? 25 : 0);
+      s += PF('M' + f(x - 9) + ' ' + f(y - 9) + 'h' + f(w + 18) + 'v' + f(h + 18) + 'h' + f(-(w + 18)) + 'Z', 2, LN);
+      s += '<image class="tr" href="' + fr[0] + '" x="' + f(x) + '" y="' + f(y) + '" width="' + f(w) + '" height="' + f(h) + '" preserveAspectRatio="xMidYMid slice"/>';
+      s += T(x + w / 2, y - 16, 12, fr[4], LN, 'middle');
     });
     [1400, 2000].forEach(function (x) { var p = pr(x, CY + 6, 110); s += P(ep(p[0], p[1], 22, 6), 1); });
     Z.hall = s;
   })();
 
+  // hand-drawn Ekosys site, based on the photo
+  function siteDrawing() {
+    var s = '', i, t;
+    function L(a, b, q) { return a + (b - a) * q; }
+    // background tower block
+    s += P('M3080 700V330H3170V700', 0.9, FAR);
+    var bw = ''; for (i = 350; i < 690; i += 22) bw += 'M3088 ' + i + 'H3162'; for (i = 3100; i < 3170; i += 18) bw += 'M' + i + ' 340V690';
+    s += P(bw, 0.4, FAR);
+    // trees and palm on the right
+    var tr = ''; [[3340, 520, 46], [3410, 490, 58], [3490, 505, 52], [3560, 480, 60]].forEach(function (c) { tr += 'M' + (c[0] - c[2]) + ' ' + c[1] + 'c0 -' + c[2] + ' ' + c[2] * 0.6 + ' -' + c[2] * 1.1 + ' ' + c[2] + ' -' + c[2] * 0.9 + 'c' + c[2] * 0.7 + ' -' + c[2] * 0.2 + ' ' + c[2] * 1.1 + ' ' + c[2] * 0.4 + ' ' + c[2] + ' ' + c[2] * 0.9 + 'c' + c[2] * 0.3 + ' ' + c[2] * 0.5 + ' -' + c[2] * 0.3 + ' ' + c[2] * 0.9 + ' -' + c[2] * 0.9 + ' ' + c[2] * 0.8 + 'z'; });
+    tr += 'M3300 600q6 -70 -4 -120M3296 480q-40 -10 -60 10M3296 480q-20 -30 -50 -30M3296 480q20 -30 54 -24M3296 480q40 -4 56 20M3296 480q4 -34 -6 -46';
+    s += P(tr, 0.8, FAR);
+    // tower crane
+    var cx = 3215, cr = 'M' + (cx - 9) + ' 700V230M' + (cx + 9) + ' 700V230';
+    for (i = 230; i < 640; i += 20) cr += 'M' + (cx - 9) + ' ' + i + 'L' + (cx + 9) + ' ' + (i + 20) + 'M' + (cx - 9) + ' ' + i + 'H' + (cx + 9);
+    s += P(cr, 1, LN);
+    s += P('M' + (cx - 13) + ' 230h26v-26h-26zM' + cx + ' 204v-40M' + (cx - 60) + ' 200H' + (cx + 70) + 'M' + cx + ' 164L' + (cx - 60) + ' 200M' + cx + ' 164L' + (cx + 70) + ' 200', 1.2, LN);
+    s += PF('M' + (cx - 46) + ' 700v-56h92v56z', 1.6, LN) + P('M' + (cx - 46) + ' 670h92M' + (cx - 30) + ' 644v26M' + (cx + 30) + ' 644v26', 0.8, LN);
+    // building frame
+    var C = 2880, Lx = 2420, R = 3060;
+    function yl(f) { return L(690, 450, f); } function yc(f) { return L(700, 390, f); } function yr(f) { return L(694, 430, f); }
+    var slab = '', slab2 = '', rail = '';
+    for (i = 1; i <= 4; i++) {
+      var f = i / 4;
+      slab += 'M' + Lx + ' ' + yl(f) + 'L' + C + ' ' + yc(f) + 'L' + R + ' ' + yr(f);
+      slab2 += 'M' + Lx + ' ' + (yl(f) + 7) + 'L' + C + ' ' + (yc(f) + 9) + 'L' + R + ' ' + (yr(f) + 8);
+      if (i < 4) { rail += 'M' + Lx + ' ' + (yl(f) - 22) + 'L' + C + ' ' + (yc(f) - 28) + 'L' + R + ' ' + (yr(f) - 25); for (t = 0.05; t < 1; t += 0.09) rail += 'M' + L(Lx, C, t) + ' ' + L(yl(f), yc(f), t) + 'v' + (-L(22, 28, t)); }
+    }
+    s += P(slab, 2.2, LN) + P(slab2, 1, LN) + P(rail, 0.6, LN);
+    var col = '';
+    [0, 0.2, 0.42, 0.68, 1].forEach(function (q) { var x = L(Lx, C, q), w = L(7, 14, q); col += 'M' + (x - w / 2) + ' ' + L(690, 700, q) + 'V' + (L(450, 390, q) + 6) + 'M' + (x + w / 2) + ' ' + L(690, 700, q) + 'V' + (L(450, 390, q) + 6); });
+    [0.5, 1].forEach(function (q) { var x = L(C, R, q), w = L(14, 9, q); col += 'M' + (x - w / 2) + ' ' + L(700, 694, q) + 'V' + (L(390, 430, q) + 6) + 'M' + (x + w / 2) + ' ' + L(700, 694, q) + 'V' + (L(390, 430, q) + 6); });
+    s += P(col, 1.8, LN);
+    // inner columns and soffits seen through the frame
+    var inn = ''; [0.3, 0.55, 0.85].forEach(function (q) { var x = L(Lx, C, q) + 40; inn += 'M' + x + ' ' + (L(690, 700, q) - 6) + 'V' + (L(450, 390, q) + 30); });
+    s += P(inn, 0.6, FAR);
+    // roof formwork, scaffold and rebar
+    var top = 'M' + Lx + ' ' + (yl(1) - 14) + 'L' + C + ' ' + (yc(1) - 18) + 'L' + R + ' ' + (yr(1) - 16);
+    var sc = '';
+    for (t = 0; t <= 1.001; t += 0.05) { var x = L(Lx, C, t), y = L(yl(1), yc(1), t) - 14 - 4 * t; sc += 'M' + x + ' ' + y + 'v-46'; }
+    for (t = 0; t <= 1.001; t += 0.25) { var x2 = L(C, R, t), y2 = L(yc(1), yr(1), t) - 18; sc += 'M' + x2 + ' ' + y2 + 'v-46'; }
+    sc += 'M' + Lx + ' ' + (yl(1) - 40) + 'L' + C + ' ' + (yc(1) - 50) + 'L' + R + ' ' + (yr(1) - 46) + 'M' + Lx + ' ' + (yl(1) - 60) + 'L' + C + ' ' + (yc(1) - 64) + 'L' + R + ' ' + (yr(1) - 62);
+    var reb = ''; for (i = 0; i < 8; i++) reb += 'M' + (C - 20 + i * 6) + ' ' + (yc(1) - 18) + 'v' + (-60 - (i % 3) * 10);
+    s += P(top, 1.4, LN) + P(sc, 0.7, LN) + P(reb, 0.8, LN);
+    // green netting tower on the left face
+    var n0 = 0.48, n1 = 0.62, nt = '', nx0 = L(Lx, C, n0), nx1 = L(Lx, C, n1);
+    var ny0 = L(450, 390, n0) - 60, ny1 = L(450, 390, n1) - 62;
+    s += PF('M' + nx0 + ' ' + ny0 + 'L' + nx1 + ' ' + ny1 + 'V' + L(690, 700, n1) + 'H' + nx0 + 'Z', 1.4, LN);
+    for (i = 0; i < 13; i++) { var yy = ny1 + i * 26; nt += 'M' + nx0 + ' ' + (yy + 2) + 'L' + nx1 + ' ' + (yy - 10); }
+    for (t = 0.25; t < 1; t += 0.25) nt += 'M' + L(nx0, nx1, t) + ' ' + L(ny0, ny1, t) + 'V' + L(690, 700, n0 + (n1 - n0) * t);
+    s += P(nt, 0.5, LN) + P('M' + (nx0 - 10) + ' 700L' + (nx0 + 30) + ' 600', 1, LN);
+    // timber formwork stack
+    var tb = '';
+    for (i = 0; i < 6; i++) { var yy2 = 700 - i * 11; tb += 'M3010 ' + yy2 + 'H3250l-14 -9H3024Z'; }
+    tb += 'M3024 634V700M3236 634V700';
+    s += PF('M3010 700V634H3250V700Z', 1.4, LN) + P(tb, 0.8, LN);
+    s += P('M2990 700v-46h8v46M2990 668h26', 1, LN);
+    // site containers and drums
+    var ct = ''; for (i = 3346; i < 3590; i += 12) ct += 'M' + i + ' 602V698';
+    s += PF('M3330 700V590H3600V700Z', 1.6, LN) + P(ct, 0.4, LN) + P('M3360 610h60v30h-60z', 1, LN);
+    s += P('M3280 700v-26a10 4 0 0 1 20 0v26M3302 700v-22a8 3 0 0 1 16 0v22', 1, LN);
+    // ground details
+    s += P('M2440 696l70 -2l8 6h-86zM2448 696l4 4M2460 696l4 4M2472 696l4 4M2484 696l4 4M2496 696l4 4', 0.8, LN);
+    s += P('M2742 700l8 -26l8 26zM2745 690h10', 1, LN);
+    s += P('M2236 700V320L2296 300V700', 1.6, LN) + P('M2250 330v300M2262 326v280', 0.5, FAR);
+    s += T(2440, 742, 13, 'Ekosys site, drawn from my photo', FAR);
+    return s;
+  }
+
   // Ekosys site: 2200..3600
   (function () {
     var s = '';
     s += P('M2214 ' + FY + 'H3600', 2);
-    var w = 1300, h = trH('site', w);
-    s += TRC('site', 2260, FY - h, w, 1, LN);
+    s += siteDrawing();
     var gr = ''; for (var gx = 2230; gx < 3600; gx += 40) gr += 'M' + gx + ' ' + (FY + 8) + 'h14';
     s += P(gr, 0.6, FAR);
     Z.site = s;
@@ -222,7 +288,7 @@
     s += box(pr, vx, 7070, 7570, 600, 616, 300, 470, 1.4) + P(seg(pr, [7090, 616, 300], [7090, FY, 300]) + seg(pr, [7550, 616, 300], [7550, FY, 300]) + seg(pr, [7090, 660, 300], [7550, 660, 300]), 1.4);
     // projects on the bench
     var bz = 330, bsc = F / (F + bz);
-    var nb = 0; function onBench(x, d0, label) { var o = pr(x, 600, bz); nb++; return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(bsc) + ')">' + d0 + '</g>' + T(o[0], o[1] + (nb % 2 ? 18 : 32), 10, label, HI, 'middle'); }
+    var nb = 0; function onBench(x, d0, label) { var o = pr(x, 600, bz); nb++; return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(bsc) + ')">' + d0 + '</g>' + T(o[0], o[1] + (nb % 2 ? 20 : 40), 12, label, HI, 'middle'); }
     s += onBench(7140, P('M-40 0h80l-20 -50h-40zM-20 -50l20 -14l20 14M-40 0l40 -14l40 14M0 -14v-50M-50 -64h100', 1.4), 'Holographic email summariser');
     s += onBench(7290, P('M-40 0v-40h80v40zM-40 -40l80 -24v24M-30 -10h20M20 -20a6 6 0 1 0 0.1 0', 1.4), 'Solar dryer');
     s += onBench(7410, P('M-24 0v-34h48v34zM-30 -34l14 -30h44l-14 30zM24 -14q30 0 34 20M-10 -20h20', 1.4), 'Solar watering system');
@@ -249,7 +315,7 @@
   // map on the garage ceiling
   var MAPX = GVX - 640, MAPY = -340, M = window.MAP, mk = 1280 / M.w, mh = M.h * mk;
   html += '<g id="mapz" opacity="0"><rect x="' + (MAPX - 20) + '" y="' + (MAPY - 60) + '" width="1320" height="' + f(mh + 100) + '" fill="' + SOFT + '" stroke="' + LN + '" stroke-width="2.4"/>' +
-    '<text class="t" x="' + MAPX + '" y="' + (MAPY - 24) + '" font-size="18" fill="' + HI + '" font-weight="500">Where I have worked</text>' +
+    '<text class="t" x="' + MAPX + '" y="' + (MAPY - 24) + '" font-size="18" fill="' + HI + '" font-weight="500">Where I have worked and travelled</text>' +
     '<g transform="translate(' + MAPX + ',' + MAPY + ') scale(' + f(mk) + ')"><path d="' + M.d + '" stroke="' + LN + '" stroke-width="' + f(1.2 / mk) + '" fill="none"/></g><g id="pins"></g></g>';
   // engine bay panel
   var EX = CARX - 520, EY = -560, EW = 1040, EH = trH('engine', EW);
@@ -365,25 +431,25 @@
 
   // ---------- timeline ----------
   var stops = [
-    { id: 'hello', x: 330, vx: 600, z: 60, cam: [90, 'auto', 1100], dwell: 1.4 },
-    { id: 'perfume', x: 640, vx: 600, z: 60, cam: [700, 'auto', 900], dwell: 2.4 },
-    { id: 'police', x: 1700, vx: 1700, z: 60, cam: [1700, 'auto', 860], dwell: 1.8 },
-    { id: 'site', x: 2330, vx: 2900, z: 60, cam: [2890, 380, 1500], dwell: 1.8 },
-    { id: 'fly1', x: 3850, vx: 3850, z: 60, cam: [3850, 440, 1000], dwell: 0.6 },
-    { id: 'dsm', x: 4280, vx: 4660, z: 60, cam: [4660, 'auto', 1250], dwell: 3 },
-    { id: 'fly2', x: 5450, vx: 5450, z: 60, cam: [5450, 440, 1000], dwell: 0.6 },
-    { id: 'pitch', x: 5950, vx: 6360, z: 60, cam: [6150, 'auto', 1200], dwell: 1.3 },
-    { id: 'kick', x: 6560, vx: 6360, z: 60, cam: [6600, 'auto', 1100], dwell: 2 },
-    { id: 'workshop', x: 7260, vx: GVX, z: 60, cam: [7300, 'auto', 900], dwell: 2 },
-    { id: 'bonnet', x: bonnetX, vx: GVX, z: 60, cam: [8150, 'auto', 1000], dwell: 3.2 },
-    { id: 'ceiling', x: bonnetX - 120, vx: GVX, z: 60, cam: [GVX, -10, 1500], dwell: 1.8 },
-    { id: 'bye', x: 9100, vx: 9100, z: 60, cam: [9150, 'auto', 1000], dwell: 2.6 }];
+    { id: 'hello', x: 330, vx: 600, z: 60, cam: [90, 'auto', 1100], dwell: 1 },
+    { id: 'perfume', x: 640, vx: 600, z: 60, cam: [700, 'auto', 760], dwell: 2 },
+    { id: 'police', x: 1576, vx: 1700, z: 60, cam: [1700, 'auto', 820], dwell: 1.4 },
+    { id: 'site', x: 2420, vx: 2900, z: 60, cam: [2850, 'auto', 1200], dwell: 1.3 },
+    { id: 'fly1', x: 3850, vx: 3850, z: 60, cam: [3850, 440, 900], dwell: 0.2 },
+    { id: 'dsm', x: 4280, vx: 4660, z: 60, cam: [4660, 'auto', 1100], dwell: 2.4 },
+    { id: 'fly2', x: 5450, vx: 5450, z: 60, cam: [5450, 440, 900], dwell: 0.2 },
+    { id: 'pitch', x: 5950, vx: 6360, z: 60, cam: [6150, 'auto', 1000], dwell: 1 },
+    { id: 'kick', x: 6560, vx: 6360, z: 60, cam: [6600, 'auto', 950], dwell: 1.6 },
+    { id: 'workshop', x: 7260, vx: GVX, z: 60, cam: [7300, 'auto', 780], dwell: 1.5 },
+    { id: 'bonnet', x: bonnetX, vx: GVX, z: 60, cam: [8150, 'auto', 860], dwell: 2.8 },
+    { id: 'ceiling', x: bonnetX - 120, vx: GVX, z: 60, cam: [GVX, -10, 1500], dwell: 1.4 },
+    { id: 'bye', x: 9100, vx: 9100, z: 60, cam: [9150, 'auto', 860], dwell: 2 }];
   var segs = [], total = 0;
   stops.forEach(function (st, i) {
-    if (i > 0) { var pv = stops[i - 1], len = Math.max(0.5, Math.abs(st.x - pv.x) / 650); if (st.id === 'ceiling' || pv.id === 'ceiling') len = 0.9; segs.push({ type: 'walk', a: pv, b: st, start: total, len: len }); total += len; }
+    if (i > 0) { var pv = stops[i - 1], len = Math.max(0.5, Math.abs(st.x - pv.x) / 900); if (/^fly/.test(st.id) || /^fly/.test(pv.id)) len = 0.7; if (st.id === 'ceiling' || pv.id === 'ceiling') len = 0.9; segs.push({ type: 'walk', a: pv, b: st, start: total, len: len }); total += len; }
     segs.push({ type: 'dwell', st: st, start: total, len: st.dwell }); total += st.dwell;
   });
-  walk.style.height = (total * 85 + 100) + 'vh';
+  walk.style.height = (total * 70 + 100) + 'vh';
 
   // ---------- cards ----------
   var CARDS = {
@@ -394,7 +460,7 @@
     pitch: ['Vice president, SUTD Football Club', 'Fixtures, venue bookings, risk assessments, and new goalposts beyond our seed funding.', 'experience.html#football'],
     workshop: ['My projects', 'The holographic email summariser, a solar dryer, a solar powered watering system and more, built at SUTD and at home.', 'projects.html'],
     bonnet: ['Toyota Corolla AE111', 'A 4A-FE manual past 314,000 km. I maintain and modify it myself, from the timing chain to the strut bar.', 'ae111.html'],
-    ceiling: ['Where I have worked', 'Singapore, Shanghai, Guangzhou and Dubai, and building a network across Asia, the Middle East and Europe.', 'experience.html']
+    ceiling: ['Where I have worked and travelled', 'Singapore, Shanghai, Guangzhou and Dubai, and building a network across Asia, the Middle East and Europe.', 'experience.html']
   };
   var cardEls = {};
   Object.keys(CARDS).forEach(function (k) {
@@ -408,7 +474,7 @@
   var W = 0, H = 0, mobile = false, view = { x: 0, y: 0, w: 1, h: 1 };
   function resize() { var r = stage.getBoundingClientRect(); W = r.width; H = r.height; mobile = W < 760; svg.setAttribute('width', W); svg.setAttribute('height', H); }
   function camW(w) { return mobile ? Math.max(w * 0.42, 360) : w; }
-  function camY(c) { if (c[1] !== 'auto') return c[1]; return FY + 16 - (mobile ? 0.36 : 0.3) * camW(c[2]) * H / W; }
+  function camY(c) { if (c[1] !== 'auto') return c[1]; return FY + 16 - (mobile ? 0.36 : 0.34) * camW(c[2]) * H / W; }
   function setCam(cx, cy, w) { w = camW(w); var h = w * H / W; view = { x: cx - w / 2, y: cy - h / 2, w: w, h: h }; svg.setAttribute('viewBox', f(view.x) + ' ' + f(view.y) + ' ' + f(w) + ' ' + f(h)); }
   function toScreen(x, y) { return [(x - view.x) / view.w * W, (y - view.y) / view.h * H]; }
 
@@ -510,8 +576,8 @@
       var lean = 14 * (1 - lf) + 14 * cl2;
       o.pose = mix(STAND, reachPose(o, [edge[0] + 2, edge[1] + 2], true, { lean: lean, head: -6 * lf }), r1);
       engO = sm(rng(t, 0.3, 0.42)) * (1 - sm(rng(t, 0.8, 0.88)));
-      if (engO > 0) { var ec = [CARX, -560 + EH / 2 - 30, 1560]; cam = [lerp(cam[0], ec[0], engO), lerp(cam[1], ec[1], engO), lerp(cam[2], mobile ? 2600 : ec[2], engO)]; }
-      active = t > 0.3 && t < 0.88 ? 'bonnet' : null;
+      if (engO > 0) { var ec = [CARX, -560 + EH / 2 - 30, 1720]; cam = [lerp(cam[0], ec[0], engO), lerp(cam[1], ec[1], engO), lerp(cam[2], mobile ? 2600 : ec[2], engO)]; }
+      active = (t > 0.04 && t < 0.3) || t > 0.9 ? 'bonnet' : null;
     }
     if (id === 'ceiling') { active = t > 0.35 ? 'ceiling' : null; o.pose = mix(STAND, { head: -28 }, 1); mapR = sm(rng(t, 0, 0.4)); }
     if (st.id === '_walk' && st.to === 'ceiling') mapR = sm(rng(t, 0.4, 1));
@@ -575,10 +641,9 @@
       if (!on) return;
       if (mobile) { el.style.top = 'auto'; el.style.bottom = '20px'; return; }
       var an = toScreen(o.x, o.y - 270 * o.scale);
-      if (k === 'bonnet') an = [W * 0.84, H + 30];
       if (k === 'ceiling') an = [W * 0.2, H * 0.84];
       if (k === 'workshop') an = toScreen(Z.holo[0] + 300, Z.holo[1] - 80);
-      if (k === 'site') an = toScreen(o.x + 120, o.y - 200);
+      if (k === 'site') an = toScreen(o.x + 360, o.y - 330);
       var lx = Math.max(20, Math.min(W - 360, an[0] - 170)), ly = Math.max(80, Math.min(H - 200, an[1] - 150));
       el.style.left = lx + 'px'; el.style.top = ly + 'px'; el.style.bottom = 'auto';
     });
