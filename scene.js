@@ -74,7 +74,7 @@
     var vx = 600, pr = proj(vx), s = '';
     s += room(vx, 0, 1200, { boards: 12, doorR: true });
     s += P(poly(pr, [[50, 440, D], [210, 440, D], [210, 560, D], [50, 560, D]], true) + seg(pr, [130, 440, D], [130, 560, D]), 1);
-    var sg = pr(1000, 425, D); s += T(sg[0], sg[1], 22, 'Fragrance Castle Singapore', HI, 'middle', 500);
+    var sg = pr(1000, 425, D); s += '<g class="rd">' + T(sg[0], sg[1], 22, 'Fragrance Castle Singapore', HI, 'middle', 500) + '</g><g class="rm">' + T(700, sg[1], 16, 'Fragrance Castle Singapore', HI, 'middle', 500) + '</g>';
     var shelves = [480, 540, 600], sc = F / (F + D - 20);
     shelves.forEach(function (y) { s += P(seg(pr, [420, y, D], [1170, y, D]), 1.2) + P(seg(pr, [420, y, D - 40], [1170, y, D - 40]) + seg(pr, [420, y, D], [420, y, D - 40]), 0.8); });
     var shapes = [
@@ -87,7 +87,7 @@
     s += box(pr, vx, 70, 380, 610, 624, 160, 270, 1.5) + P(seg(pr, [80, 624, 160], [80, FY, 160]) + seg(pr, [370, 624, 160], [370, FY, 160]), 1.5);
     var mp = pr(150, 610, 220), ms = F / (F + 220);
     s += '<g transform="translate(' + f(mp[0]) + ',' + f(mp[1]) + ') scale(' + f(ms) + ')">' + PF('M-6 -110h150v86h-150z', 1.6) + P('M66 -24v20M44 -4h44', 1.6) + P('M6 -96h36M6 -86h28M6 -76h32', 0.8) + P('M60 -40v-20M74 -40v-34M88 -40v-28M102 -40v-46M116 -40v-38', 2) + PF('M170 -4h50v-34h-50z', 1.4) + P('M178 -38v-6h34v6M182 -4l4 10h18l4 -10', 1) + '</g>';
-    s += T(mp[0] + 4, mp[1] - 118 * ms, 13, 'Shopee, Lazada, Shopify', LN);
+    Z.monLab = [mp[0] - 6 * ms, mp[1] - 154 * ms];
     // display counter
     s += box(pr, vx, 690, 1010, 600, FY, 100, 190, 1.5);
     var cb = ''; [770, 820, 870, 930, 980].forEach(function (x, i) { var p = pr(x, 600, 140); cb += '<g transform="translate(' + f(p[0]) + ',' + f(p[1]) + ') scale(' + f(F / (F + 140)) + ')">' + P(shapes[i % 4](), 1.3) + '</g>'; });
@@ -193,14 +193,17 @@
   })();
 
   // flights
-  function route(x0, x1, a, b) {
-    var s = '<path d="M' + x0 + ' ' + (FY - 40) + 'Q' + ((x0 + x1) / 2) + ' ' + (FY - 520) + ' ' + x1 + ' ' + (FY - 40) + '" stroke="' + FAR + '" stroke-width="1.2" fill="none" stroke-dasharray="6 8"/>';
-    s += PF(cp(x0, FY - 40, 6), 1.4, HI) + PF(cp(x1, FY - 40, 6), 1.4, HI);
-    s += T(x0, FY - 10, 16, a, HI, 'middle', 500) + T(x1, FY - 10, 16, b, HI, 'middle', 500);
-    return s + P('M' + (x0 - 40) + ' ' + FY + 'H' + (x1 + 40), 1, FAR);
+  // desktop and phone versions of each route, switched by [data-m] on the svg
+  var FL = { fly1: { d: [3640, 4060], m: [3730, 3970] }, fly2: { d: [5240, 5660], m: [5330, 5570] } };
+  function route(x0, x1, a, b, fs, cy, cl, r) {
+    var s = '<g class="' + cl + '"><path d="M' + x0 + ' ' + (FY - 40) + 'Q' + ((x0 + x1) / 2) + ' ' + cy + ' ' + x1 + ' ' + (FY - 40) + '" stroke="' + FAR + '" stroke-width="' + (r > 6 ? 1.8 : 1.2) + '" fill="none" stroke-dasharray="6 8"/>';
+    s += PF(cp(x0, FY - 40, r), 1.4, HI) + PF(cp(x1, FY - 40, r), 1.4, HI);
+    s += T(x0, FY - 10, fs, a, HI, 'middle', 500) + T(x1, FY - 10, fs, b, HI, 'middle', 500);
+    return s + P('M' + (x0 - 50) + ' ' + FY + 'H' + (x1 + 50), 1, FAR) + '</g>';
   }
-  Z.fly1 = route(3640, 4060, 'Singapore', 'Shanghai');
-  Z.fly2 = route(5240, 5660, 'Guangzhou', 'Singapore');
+  function routes(k, a, b) { return route(FL[k].d[0], FL[k].d[1], a, b, 16, FY - 520, 'rd', 6) + route(FL[k].m[0], FL[k].m[1], a, b, 23, FY - 440, 'rm', 8); }
+  Z.fly1 = routes('fly1', 'Singapore', 'Shanghai');
+  Z.fly2 = routes('fly2', 'Guangzhou', 'Singapore');
   Z.plane = P('M-40 0h70l18 -6l4 6l-4 6l-18 -6M0 0l-20 -30h12l28 30M0 0l-20 30h12l28 -30M-40 0l-10 -14h8l10 14', 1.6, HI);
 
   // dsm-firmenich: 4100..5220
@@ -234,7 +237,6 @@
     s += box(pr, vx, 4880, 5160, 600, 614, 140, 240, 1.4) + P(seg(pr, [4890, 614, 140], [4890, FY, 140]) + seg(pr, [5150, 614, 140], [5150, FY, 140]), 1.4);
     var e2 = pr(4910, 600, 180);
     s += '<g transform="translate(' + f(e2[0]) + ',' + f(e2[1]) + ') scale(' + f(bs) + ')">' + P('M0 0l6 -30v-20h14v20l6 30zM50 0v-44h20v44zM50 -20h20M90 0h60v-10h-60zM96 -10v-6h48v6M170 0v-70M166 -70h8M170 -40h30M200 -40v-8', 1.3) + T(120, -20, 10, '0.00 g', LN, 'middle') + '</g>';
-    var tg = pr(5020, 640, 140); s += T(tg[0], tg[1], 13, 'Guangzhou', HI, 'middle', 500);
     Z.dsm = s;
     Z.clients = [pr(4560, FY, 380), pr(4740, FY, 380), F / (F + 380)];
   })();
@@ -278,21 +280,25 @@
     // door frame on the left wall
     s += P(poly(pr, [[7020, FY, 140], [7020, FY - 260, 140], [7020, FY - 260, 360], [7020, FY, 360]]), 1.6);
     // pegboard and bench (workshop)
-    var pb = [[7080, 440, D], [7560, 440, D], [7560, 590, D], [7080, 590, D]];
+    var pb = [[7080, 420, D], [7560, 420, D], [7560, 590, D], [7080, 590, D]];
     s += P(poly(pr, pb, true), 1.2);
-    var holes = ''; for (var hx = 7100; hx < 7550; hx += 22) for (var hy = 452; hy < 585; hy += 22) { var hp = pr(hx, hy, D); holes += 'M' + f(hp[0]) + ' ' + f(hp[1]) + 'h0.8'; }
+    var holes = ''; for (var hx = 7100; hx < 7550; hx += 22) for (var hy = 434; hy < 585; hy += 22) { var hp = pr(hx, hy, D); holes += 'M' + f(hp[0]) + ' ' + f(hp[1]) + 'h0.8'; }
     s += P(holes, 1.2, FAR);
-    function onWall(d0, x0, y0) { var o = pr(x0, y0, D), sc = F / (F + D); return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(sc) + ')">' + d0 + '</g>'; }
-    s += onWall(P('M0 0v70M-14 0h28v14h-28z', 2), 7120, 470) + onWall(P('M0 0l30 80M-6 -2l12 -4l4 10l-12 4z', 1.6), 7180, 465) + onWall(P('M0 0v80M-8 0a8 8 0 1 1 16 0M0 80l-6 6M0 80l6 6', 1.6), 7250, 465);
-    s += onWall(P('M0 0h70l10 30h-90zM-10 30h90M10 30v40', 1.6), 7330, 470) + onWall(P('M0 0v60M14 0v70M28 0v50M42 0v64M-4 -6h50', 1.6), 7440, 470) + onWall(P(cp(0, 0, 18) + 'M0 18v50', 1.6), 7530, 480);
+    function onWall(d0, x0, y0) { var o = pr(x0, y0, D), sc = F / (F + D) * 0.8; return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(sc) + ')">' + d0 + '</g>'; }
+    s += onWall(P('M0 0v70M-14 0h28v14h-28z', 2), 7120, 438) + onWall(P('M0 0l30 80M-6 -2l12 -4l4 10l-12 4z', 1.6), 7180, 433) + onWall(P('M0 0v80M-8 0a8 8 0 1 1 16 0M0 80l-6 6M0 80l6 6', 1.6), 7250, 433);
+    s += onWall(P('M0 0h70l10 30h-90zM-10 30h90M10 30v40', 1.6), 7330, 438) + onWall(P('M0 0v60M14 0v70M28 0v50M42 0v64M-4 -6h50', 1.6), 7440, 438) + onWall(P(cp(0, 0, 18) + 'M0 18v50', 1.6), 7530, 446);
     s += box(pr, vx, 7070, 7570, 600, 616, 300, 470, 1.4) + P(seg(pr, [7090, 616, 300], [7090, FY, 300]) + seg(pr, [7550, 616, 300], [7550, FY, 300]) + seg(pr, [7090, 660, 300], [7550, 660, 300]), 1.4);
     // projects on the bench
     var bz = 330, bsc = F / (F + bz);
-    var nb = 0; function onBench(x, d0, label) { var o = pr(x, 600, bz); nb++; return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(bsc) + ')">' + d0 + '</g>' + T(o[0], o[1] + (nb % 2 ? 20 : 40), 12, label, HI, 'middle'); }
-    s += onBench(7140, P('M-40 0h80l-20 -50h-40zM-20 -50l20 -14l20 14M-40 0l40 -14l40 14M0 -14v-50M-50 -64h100', 1.4), 'Holographic email summariser');
-    s += onBench(7290, P('M-40 0v-40h80v40zM-40 -40l80 -24v24M-30 -10h20M20 -20a6 6 0 1 0 0.1 0', 1.4), 'Solar dryer');
-    s += onBench(7410, P('M-24 0v-34h48v34zM-30 -34l14 -30h44l-14 30zM24 -14q30 0 34 20M-10 -20h20', 1.4), 'Solar watering system');
-    s += onBench(7520, P('M-30 0v-70h60v70zM-24 -64h48v40h-48zM-10 -30v-14h20v14M-30 -10h60', 1.4), '3D printer');
+    var BL = [];
+    function onBench(x, d0, label, short) { var o = pr(x, 600, bz); BL.push([o[0], label, short]); return '<g transform="translate(' + f(o[0]) + ',' + f(o[1]) + ') scale(' + f(bsc) + ')">' + d0 + '</g>'; }
+    s += onBench(7140, P('M-40 0h80l-20 -50h-40zM-20 -50l20 -14l20 14M-40 0l40 -14l40 14M0 -14v-50M-50 -64h100', 1.4), 'Email summariser', 'Email');
+    s += onBench(7290, P('M-40 0v-40h80v40zM-40 -40l80 -24v24M-30 -10h20M20 -20a6 6 0 1 0 0.1 0', 1.4), 'Solar dryer', 'Dryer');
+    s += onBench(7410, P('M-24 0v-34h48v34zM-30 -34l14 -30h44l-14 30zM24 -14q30 0 34 20M-10 -20h20', 1.4), 'Solar watering', 'Watering');
+    s += onBench(7520, P('M-30 0v-70h60v70zM-24 -64h48v40h-48zM-10 -30v-14h20v14M-30 -10h60', 1.4), '3D printer', '3D printer');
+    // each label is a small tag sitting directly on top of its own object
+    function tag(cx, label, fs, cl) { var w = label.length * fs * 0.56 + 8; return '<g class="' + cl + '"><rect x="' + f(cx - w / 2) + '" y="' + f(538 - fs - 3) + '" width="' + f(w) + '" height="' + f(fs + 6) + '" rx="3" fill="' + INK + '" stroke="' + LN + '" stroke-width="0.7"/>' + T(cx, 536, fs, label, HI, 'middle') + '</g>'; }
+    BL.forEach(function (b) { s += tag(b[0], b[1], 10.5, 'rd') + tag(b[0], b[2], 13, 'rm'); });
     // tyres and tool chest at the far end
     for (var t = 0; t < 4; t++) { var tp = pr(8620, FY - t * 26, 380), sc2 = F / (F + 380); s += P(ep(tp[0], tp[1] - 13 * sc2, 46 * sc2, 13 * sc2), 1) + P(ep(tp[0], tp[1] - 13 * sc2, 26 * sc2, 7 * sc2), 0.6, FAR); }
     s += box(pr, vx, 8380, 8520, 560, FY, 420, 500, 1.2);
@@ -308,27 +314,33 @@
   // ---------- assemble ----------
   var zones = [['office', 0, 1200], ['hall', 1200, 2200], ['site', 2200, 3600], ['fly1', 3600, 4100], ['dsm', 4100, 5220], ['fly2', 5220, 5700], ['pitch', 5700, 7020], ['garage', 7020, 8720], ['end', 8720, 9500]];
   var html = '';
-  zones.forEach(function (z) { html += '<g class="zone" data-x0="' + z[1] + '" data-x1="' + z[2] + '">' + Z[z[0]] + '</g>'; });
+  zones.forEach(function (z) { html += '<g class="zone' + (z[0].indexOf('fly') === 0 ? ' fz' : '') + '" data-x0="' + z[1] + '" data-x1="' + z[2] + '">' + Z[z[0]] + '</g>'; });
+  html += '<g id="statics" class="zone" data-x0="4100" data-x1="5220" style="opacity:var(--r,0)"></g>';
   var gp = proj(GVX), ac = gp(CARX, FY, CARZ), acs = F / (F + CARZ), carOX = ac[0] - 215 * acs, carOY = ac[1];
   html += '<g class="zone" data-x0="7020" data-x1="8720"><g transform="translate(' + f(carOX) + ',' + f(carOY) + ') scale(' + f(acs) + ')"><g id="eng-side" opacity="0">' + P('M342 -84h60v-6h-60zM350 -90v-8h44v8M356 -98v-6h32v6M402 -86h12v20h-12', 1.1) + '</g>' + carBody() + '<g id="bonnet">' + PF('M333 -92L418 -76L418 -71L333 -87Z', 2.2) + '</g></g></g>';
   html += '<g id="doors"></g>';
   // map on the garage ceiling
   var MAPX = GVX - 640, MAPY = -340, M = window.MAP, mk = 1280 / M.w, mh = M.h * mk;
-  html += '<g id="mapz" opacity="0"><rect x="' + (MAPX - 20) + '" y="' + (MAPY - 60) + '" width="1320" height="' + f(mh + 100) + '" fill="' + SOFT + '" stroke="' + LN + '" stroke-width="2.4"/>' +
-    '<text class="t" x="' + MAPX + '" y="' + (MAPY - 24) + '" font-size="18" fill="' + HI + '" font-weight="500">Where I have worked and travelled</text>' +
-    '<g transform="translate(' + MAPX + ',' + MAPY + ') scale(' + f(mk) + ')"><path d="' + M.d + '" stroke="' + LN + '" stroke-width="' + f(1.2 / mk) + '" fill="none"/></g><g id="pins"></g></g>';
+  html += '<g id="mapz" opacity="0"><rect id="mapf" x="' + (MAPX - 20) + '" y="' + (MAPY - 60) + '" width="1320" height="' + f(mh + 100) + '" fill="' + SOFT + '" stroke="' + LN + '" stroke-width="2.4"/>' +
+    '<text id="mapt" class="t" x="' + MAPX + '" y="' + (MAPY - 24) + '" font-size="18" fill="' + HI + '" font-weight="500">Where I have worked and travelled</text>' +
+    '<clipPath id="mapclip"><rect x="' + MAPX + '" y="' + MAPY + '" width="1280" height="' + f(mh) + '"/></clipPath><g clip-path="url(#mapclip)"><g transform="translate(' + MAPX + ',' + MAPY + ') scale(' + f(mk) + ')"><path id="mapp" d="' + M.d + '" stroke="' + LN + '" stroke-width="' + f(1.2 / mk) + '" fill="none"/></g></g><g id="pins"></g></g>';
   // engine bay panel
   var EX = CARX - 520, EY = -560, EW = 1040, EH = trH('engine', EW);
   var callouts = [[1150, 335, 'Ultra Racing front strut bar', 1], [1520, 860, 'Cone filter and heat-wrapped intake', 1], [980, 790, 'Blue ignition leads', 0], [1095, 960, 'New distributor', 1], [740, 850, '4A-FE valve cover', 0], [470, 1110, 'New alternator', 0], [720, 1365, 'New radiator', 0], [1700, 1200, 'Battery with inline fuse', 1]];
-  var co = '';
-  callouts.forEach(function (c) {
-    var px = EX + c[0] / 2016 * EW, py = EY + c[1] / 1512 * EH, right = c[3], tx = right ? EX + EW - 20 : EX + 20, ty = py;
-    var tw = c[2].length * 8.6 + 16, bx = right ? tx - tw : tx;
-    co += '<path d="M' + f(px) + ' ' + f(py) + 'L' + f(right ? bx : bx + tw) + ' ' + f(ty) + '" stroke="' + HI + '" stroke-width="1.2" fill="none"/>' + '<circle cx="' + f(px) + '" cy="' + f(py) + '" r="4" fill="' + HI + '"/>';
-    co += '<rect x="' + f(bx) + '" y="' + f(ty - 15) + '" width="' + f(tw) + '" height="28" fill="' + INK + '" stroke="' + HI + '" stroke-width="1"/>' + '<text class="t" x="' + f(bx + 8) + '" y="' + f(ty + 5) + '" font-size="15" fill="' + HI + '">' + c[2] + '</text>';
-  });
-  html += '<g id="engbay" opacity="0"><rect x="' + (EX - 16) + '" y="' + (EY - 56) + '" width="' + (EW + 32) + '" height="' + f(EH + 72) + '" fill="' + INK + '" stroke="' + HI + '" stroke-width="2.6"/>' +
-    '<text class="t" x="' + (EX) + '" y="' + (EY - 20) + '" font-size="20" fill="' + HI + '" font-weight="500">My engine bay, traced from a photo</text>' + TRC('engine', EX, EY, EW, 1, LN, 'eng') + co + '</g>';
+  var callsM = [[1150, 335, 'Strut bar', 1], [1520, 860, 'Cone filter', 1], [1700, 1200, 'Battery', 1], [740, 850, 'Valve cover', 0], [470, 1110, 'Alternator', 0], [720, 1365, 'Radiator', 0]];
+  function callHtml(list, fs, cl) {
+    var co = '<g class="' + cl + '">';
+    list.forEach(function (c) {
+      var px = EX + c[0] / 2016 * EW, py = EY + c[1] / 1512 * EH, right = c[3], tx = right ? EX + EW - 20 : EX + 20, ty = py;
+      var tw = c[2].length * fs * 0.575 + fs, bx = right ? tx - tw : tx, bh = fs * 1.87;
+      co += '<path d="M' + f(px) + ' ' + f(py) + 'L' + f(right ? bx : bx + tw) + ' ' + f(ty) + '" stroke="' + HI + '" stroke-width="' + (fs > 20 ? 2.2 : 1.2) + '" fill="none"/>' + '<circle cx="' + f(px) + '" cy="' + f(py) + '" r="' + (fs > 20 ? 8 : 4) + '" fill="' + HI + '"/>';
+      co += '<rect x="' + f(bx) + '" y="' + f(ty - bh / 2) + '" width="' + f(tw) + '" height="' + f(bh) + '" fill="' + INK + '" stroke="' + HI + '" stroke-width="' + (fs > 20 ? 1.6 : 1) + '"/>' + '<text class="t" x="' + f(bx + fs / 2) + '" y="' + f(ty + fs * 0.34) + '" font-size="' + fs + '" fill="' + HI + '">' + c[2] + '</text>';
+    });
+    return co + '</g>';
+  }
+  var co = callHtml(callouts, 15, 'rd') + callHtml(callsM, 34, 'rm');
+  html += '<g id="engbay" opacity="0"><rect id="engf" x="' + (EX - 16) + '" y="' + (EY - 56) + '" width="' + (EW + 32) + '" height="' + f(EH + 72) + '" fill="' + INK + '" stroke="' + HI + '" stroke-width="2.6"/>' +
+    '<text id="engt" class="t" x="' + (EX) + '" y="' + (EY - 20) + '" font-size="20" fill="' + HI + '" font-weight="500">My engine bay, traced from a photo</text><image class="eng" href="engine-trace.png" x="' + EX + '" y="' + EY + '" width="' + EW + '" height="' + f(EH) + '" preserveAspectRatio="none"/>' + co + '</g>';
   html += '<g id="plane"></g><g id="fx"></g><g id="me"></g><g id="fx2"></g>';
   svg.innerHTML = html;
 
@@ -415,7 +427,7 @@
   function rng(t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }
   function lerp(a, b, t) { return a + (b - a) * t; }
   function floorAt(vx, x, z) { var p = proj(vx)(x, FY, z); return { x: p[0], y: p[1], s: F / (F + z) }; }
-  function bottle(x, y, s, rot) { return '<g transform="translate(' + f(x) + ',' + f(y) + ') rotate(' + (rot || 0) + ') scale(' + f(s) + ')"><path d="M-7 12v-22h14v22zM-3 -10v-6h6v6zM-5 -16h10v-6h-10z" stroke="' + HI + '" stroke-width="1.6" fill="' + INK + '"/></g>'; }
+  function bottle(x, y, s, rot) { return '<g transform="translate(' + f(x) + ',' + f(y) + ') rotate(' + f(rot || 0) + ') scale(' + f(s) + ')"><path d="M-7 12v-22h14v22zM-3 -10v-6h6v6zM-5 -16h10v-6h-10z" stroke="' + HI + '" stroke-width="1.6" fill="' + INK + '"/></g>'; }
   function bubble(x, y, w, lines, think) {
     var h = 24 + lines.length * 24, s = '<g class="bub">';
     s += '<rect x="' + f(x) + '" y="' + f(y) + '" width="' + w + '" height="' + h + '" rx="' + (think ? 22 : 6) + '" fill="' + INK + '" stroke="' + HI + '" stroke-width="1.8"/>';
@@ -431,25 +443,36 @@
 
   // ---------- timeline ----------
   var stops = [
-    { id: 'hello', x: 330, vx: 600, z: 60, cam: [90, 'auto', 1100], dwell: 1 },
-    { id: 'perfume', x: 640, vx: 600, z: 60, cam: [700, 'auto', 760], dwell: 2 },
-    { id: 'police', x: 1576, vx: 1700, z: 60, cam: [1700, 'auto', 820], dwell: 1.4 },
-    { id: 'site', x: 2420, vx: 2900, z: 60, cam: [2850, 'auto', 1200], dwell: 1.3 },
-    { id: 'fly1', x: 3850, vx: 3850, z: 60, cam: [3850, 440, 900], dwell: 0.2 },
-    { id: 'dsm', x: 4280, vx: 4660, z: 60, cam: [4660, 'auto', 1100], dwell: 2.4 },
-    { id: 'fly2', x: 5450, vx: 5450, z: 60, cam: [5450, 440, 900], dwell: 0.2 },
-    { id: 'pitch', x: 5950, vx: 6360, z: 60, cam: [6150, 'auto', 1000], dwell: 1 },
-    { id: 'kick', x: 6560, vx: 6360, z: 60, cam: [6600, 'auto', 950], dwell: 1.6 },
-    { id: 'workshop', x: 7260, vx: GVX, z: 60, cam: [7300, 'auto', 780], dwell: 1.5 },
-    { id: 'bonnet', x: bonnetX, vx: GVX, z: 60, cam: [8150, 'auto', 860], dwell: 2.8 },
-    { id: 'ceiling', x: bonnetX - 120, vx: GVX, z: 60, cam: [GVX, -10, 1500], dwell: 1.4 },
-    { id: 'bye', x: 9100, vx: 9100, z: 60, cam: [9150, 'auto', 860], dwell: 2 }];
-  var segs = [], total = 0;
+    { id: 'hello', x: 330, z: 60, cam: [90, 'auto', 1100, 0.34, 0.34], dwell: 1 },
+    { id: 'perfume', x: 640, z: 60, cam: [700, 'auto', 760], dwell: 1.9 },
+    { id: 'police', x: 1576, z: 60, cam: [1700, 'auto', 820], dwell: 0.95 },
+    { id: 'site', x: 2420, z: 60, cam: [2850, 'auto', 1200], dwell: 0.95 },
+    { id: 'fly1', x: 3640, xo: 4060, z: 60, cam: [3850, 440, 900], dwell: 0.7 },
+    { id: 'dsm', x: 4280, xo: 5000, z: 60, cam: [4660, 'auto', 1100], dwell: 2.2 },
+    { id: 'fly2', x: 5240, xo: 5660, z: 60, cam: [5450, 440, 900], dwell: 0.7 },
+    { id: 'pitch', x: 5950, z: 60, cam: [6150, 'auto', 1000], dwell: 1 },
+    { id: 'kick', x: 6560, z: 60, cam: [6600, 'auto', 950], dwell: 1.5 },
+    { id: 'workshop', x: 7260, z: 60, cam: [7300, 'auto', 780], dwell: 1.2 },
+    { id: 'bonnet', x: bonnetX, z: 60, cam: [8150, 'auto', 860], dwell: 2.5 },
+    { id: 'ceiling', x: bonnetX - 120, z: 60, cam: [GVX, -10, 1500], dwell: 1 },
+    { id: 'bye', x: 9100, z: 60, cam: [9150, 'auto', 860, 0.2, 0.4], dwell: 1 }];
+  var SB = {}; stops.forEach(function (st) { SB[st.id] = st; });
+  var ceilStop = stops[11];
+  var segs = [], total = 0, byeStart = 0;
   stops.forEach(function (st, i) {
-    if (i > 0) { var pv = stops[i - 1], len = Math.max(0.5, Math.abs(st.x - pv.x) / 900); if (/^fly/.test(st.id) || /^fly/.test(pv.id)) len = 0.7; if (st.id === 'ceiling' || pv.id === 'ceiling') len = 0.9; segs.push({ type: 'walk', a: pv, b: st, start: total, len: len }); total += len; }
+    if (i > 0) { var pv = stops[i - 1], len = Math.max(0.5, Math.abs(st.x - (pv.xo !== undefined ? pv.xo : pv.x)) / 900); if (/^fly/.test(st.id) || /^fly/.test(pv.id)) len = 0.6; if (st.id === 'ceiling' || pv.id === 'ceiling') len = 0.9; segs.push({ type: 'walk', a: pv, b: st, start: total, len: len }); total += len; }
+    if (st.id === 'bye') byeStart = total;
     segs.push({ type: 'dwell', st: st, start: total, len: st.dwell }); total += st.dwell;
   });
   walk.style.height = (total * 70 + 100) + 'vh';
+
+  // vanishing point as a continuous function of the figure's x, blended across each zone boundary
+  var VXK = [[0, 600], [1060, 600], [1340, 1700], [2060, 1700], [2340, 2900], [3460, 2900], [4240, 4660], [5080, 4660], [5840, 6360], [6880, 6360], [7160, GVX], [8580, GVX], [8900, 9100], [9500, 9100]];
+  function vxAt(x) {
+    if (x <= VXK[0][0]) return VXK[0][1];
+    for (var i = 1; i < VXK.length; i++) if (x < VXK[i][0]) { var a = VXK[i - 1], b = VXK[i]; return a[1] + (b[1] - a[1]) * sm((x - a[0]) / (b[0] - a[0])); }
+    return VXK[VXK.length - 1][1];
+  }
 
   // ---------- cards ----------
   var CARDS = {
@@ -462,201 +485,321 @@
     bonnet: ['Toyota Corolla AE111', 'A 4A-FE manual past 314,000 km. I maintain and modify it myself, from the timing chain to the strut bar.', 'ae111.html'],
     ceiling: ['Where I have worked and travelled', 'Singapore, Shanghai, Guangzhou and Dubai, and building a network across Asia, the Middle East and Europe.', 'experience.html']
   };
-  var cardEls = {};
-  Object.keys(CARDS).forEach(function (k) {
+  var cardEls = {}, cardKeys = Object.keys(CARDS), cardLast = {};
+  cardKeys.forEach(function (k) {
     var c = CARDS[k], el = document.createElement('div');
-    el.className = 'wcard';
+    el.className = 'wcard' + ((k === 'perfume' || k === 'workshop') ? ' na' : '');
     el.innerHTML = '<p class="wc-t">' + c[0] + '</p><p class="wc-b">' + c[1] + '</p><a href="' + c[2] + '">Read more</a>';
-    cardsEl.appendChild(el); cardEls[k] = el;
+    el.style.opacity = 0; el.style.visibility = 'hidden';
+    cardsEl.appendChild(el); cardEls[k] = el; cardLast[k] = '';
   });
+  // fade windows as fractions of the dwell: in0, in1, out0, out1. Pure functions of scroll, so no flicker
+  var CW = { perfume: [0.15, 0.3, 0.85, 1], police: [0, 0.2, 0.85, 1], site: [0.12, 0.3, 0.85, 1], dsm: [0, 0.08, 0.93, 1], pitch: [0, 0.2, 2, 3], workshop: [0.2, 0.36, 0.9, 1], ceiling: [0.2, 0.4, 0.92, 1] };
+  function win(t, a, b, c, d) { return sm(rng(t, a, b)) * (1 - sm(rng(t, c, d))); }
 
   // ---------- frame ----------
-  var W = 0, H = 0, mobile = false, view = { x: 0, y: 0, w: 1, h: 1 };
-  function resize() { var r = stage.getBoundingClientRect(); W = r.width; H = r.height; mobile = W < 760; svg.setAttribute('width', W); svg.setAttribute('height', H); }
+  var W = 0, H = 0, mobile = false, view = { x: 0, y: 0, w: 1, h: 1 }, barPx = 86, ecam = [CARX, -200, 1720], mapMf = 1;
+  var topEl = document.querySelector('.w-top'), mapF = $('mapf'), mapT = $('mapt'), mapP = $('mapp');
+  var MAPFW = 1320, MAPFH = mh + 100, MAPFY = MAPY - 60;
+  // camera that frames a world rect fully below the top bar, centred in the free space
+  function fitCam(wx, wy, ww, wh, cx, cap) {
+    var pad = mobile ? 12 : 60, gap = mobile ? 14 : 28, s = Math.min((W - 2 * pad) / ww, (H - barPx - 2 * gap) / wh, cap || 9);
+    var top = barPx + (mobile ? gap : Math.max(gap, (H - barPx - wh * s) / 2)), cw = W / s;
+    return [cx, wy - top / s + H / s / 2, cw];
+  }
+  function resize() {
+    var r = stage.getBoundingClientRect(); W = r.width; H = r.height; mobile = W < 760; svg.setAttribute('width', W); svg.setAttribute('height', H);
+    barPx = topEl ? Math.ceil(topEl.getBoundingClientRect().bottom - r.top) : 86;
+    var c = fitCam(MAPX - 20, MAPFY, MAPFW, MAPFH, GVX, mobile ? 9 : 0.92);
+    ceilStop.cam = [c[0], c[1], mobile ? c[2] / 0.42 : c[2]];
+    var e = fitCam(EX - 16, EY - 56, EW + 32, EH + 72, CARX, 1);
+    ecam = [e[0], e[1], mobile ? e[2] / 0.42 : e[2]];
+    mapMf = mobile ? 1.9 : 1;
+    $('engt').setAttribute('font-size', mobile ? 40 : 20);
+    svg.setAttribute('data-m', mobile ? 1 : 0);
+    ['fly1', 'fly2'].forEach(function (k) { var r = mobile ? FL[k].m : FL[k].d; SB[k].x = r[0]; SB[k].xo = r[1]; SB[k].cam[2] = mobile ? 1000 : 900; });
+    SB.police.x = mobile ? 1330 : 1576; SB.police.xo = mobile ? 2060 : undefined;
+    SB.hello.cam[0] = mobile ? 90 : 30;
+    SB.workshop.cam[0] = mobile ? 7340 : 7300; SB.workshop.camo = mobile ? 7570 : undefined;
+    mapT.setAttribute('font-size', 18 * mapMf); mapF.setAttribute('stroke-width', 2.4 * (mobile ? 2.2 : 1));
+    mapP.setAttribute('stroke-width', f((mobile ? 2.8 : 1.2) / mk));
+  }
   function camW(w) { return mobile ? Math.max(w * 0.42, 360) : w; }
-  function camY(c) { if (c[1] !== 'auto') return c[1]; return FY + 16 - (mobile ? 0.36 : 0.34) * camW(c[2]) * H / W; }
-  function setCam(cx, cy, w) { w = camW(w); var h = w * H / W; view = { x: cx - w / 2, y: cy - h / 2, w: w, h: h }; svg.setAttribute('viewBox', f(view.x) + ' ' + f(view.y) + ' ' + f(w) + ' ' + f(h)); }
+  function camY(c) { if (c[1] !== 'auto') return c[1]; return FY + 16 - (mobile ? (c[3] !== undefined ? c[3] : 0.2) : (c[4] !== undefined ? c[4] : 0.34)) * camW(c[2]) * H / W; }
+  var lastVB = '';
+  function setCam(cx, cy, w) { w = camW(w); var h = w * H / W; view = { x: cx - w / 2, y: cy - h / 2, w: w, h: h }; var vb = f(view.x) + ' ' + f(view.y) + ' ' + f(w) + ' ' + f(h); if (vb !== lastVB) { lastVB = vb; svg.setAttribute('viewBox', vb); } }
   function toScreen(x, y) { return [(x - view.x) / view.w * W, (y - view.y) / view.h * H]; }
+  function setA(el, k, v) { if (el['_' + k] !== v) { el['_' + k] = v; el.setAttribute(k, v); } }
+
+  // cached static figures
+  var STAND_FIG = figure({ x: 0, y: 0, dir: 1, scale: 1, pose: STAND, outfit: 'polo' }).s;
+  (function () {
+    var cl = Z.clients;
+    $('statics').innerHTML = [[cl[0], 1], [cl[1], -1]].map(function (c2) { return '<g transform="' + place({ x: c2[0][0], y: c2[0][1], dir: c2[1], scale: cl[2] }) + '">' + STAND_FIG + '</g>'; }).join('');
+  })();
+  var PL = [floorAt(6360, 6300, 260), floorAt(6360, 6480, 200)];
+  var PL_STAND = PL.map(function (pl, n) { return '<g transform="' + place({ x: pl.x, y: pl.y, dir: n ? -1 : 1, scale: pl.s }) + '">' + STAND_FIG + '</g>'; });
+  var RUN = { hN: 40, kN: -40, lean: -4 };
+  var DSM_LAB = ['Smelling', 'Client meeting', 'Blending'], DSM_CAP = [[4330, 'end'], [0, 'middle'], [4987, 'start']];
+  var DSM_POSES = [{ sN: 150, eN: -130, head: 6 }, { sN: 40, eN: -70, sF: 30, eF: -60 }, { sN: 80, eN: -60, head: -8, sF: 70, eF: -30 }];
+  var DSM_X = [4280, 4640, 5000];
+  var lastMe = '', lastFx = '', lastFx2 = '', lastPlane = '', lastDoor = -1, lastPins = '', lastEng = '', lastR = [];
 
   function frame(u) {
     var sg = segs[segs.length - 1], i;
     for (i = 0; i < segs.length; i++) if (u < segs[i].start + segs[i].len) { sg = segs[i]; break; }
     var t = Math.max(0, Math.min(1, (u - sg.start) / sg.len));
-    var st, x, z, vx, cam, pose = STAND, dir = 1;
-    if (sg.type === 'walk') {
-      var a = sg.a, b = sg.b, e = sm(t);
-      x = lerp(a.x, b.x, t); z = lerp(a.z, b.z, t); vx = t < 0.5 ? a.vx : b.vx;
-      cam = [lerp(a.cam[0], b.cam[0], e), lerp(camY(a.cam), camY(b.cam), e), lerp(a.cam[2], b.cam[2], e)];
-      dir = b.x >= a.x ? 1 : -1;
-      if (Math.abs(b.x - a.x) > 5) pose = mix(STAND, walkPose(x / 30), Math.min(1, t * 6, (1 - t) * 6));
-      if (b.id === 'ceiling') pose = mix(STAND, { head: -28 }, sm(t));
-      if (a.id === 'ceiling') pose = mix(STAND, { head: -28 }, 1 - sm(t * 3));
-      st = { id: '_walk', from: a.id, to: b.id };
-    } else { st = sg.st; x = st.x; z = st.z; vx = st.vx; cam = [st.cam[0], camY(st.cam), st.cam[2]]; }
-    // walls between zones use the zone's own vanishing point
-    zones.forEach(function (zn) { if (x >= zn[1] && x < zn[2]) { var m = { office: 600, hall: 1700, site: 2900, dsm: 4660, pitch: 6360, garage: GVX }; if (m[zn[0]]) vx = m[zn[0]]; } });
-    var fp = floorAt(vx, x, z);
-    var outfit = x >= 1200 && x < 2214 ? 'police' : x >= 2214 && x < 3600 ? 'ppe' : 'polo';
-    var o = { x: fp.x, y: fp.y, dir: dir, scale: fp.s, pose: pose, outfit: outfit };
-    var id = st.id, fx = '', fx2 = '', active = null, hidden = false;
-    var bonnetA = 0, engO = 0, holoO = 0, mapR = 0, doorOpen = sm(rng(x, 6900, 7060));
+    var isWalk = sg.type === 'walk', st, x, z, cam, pose = STAND, dir = 1, frontW = 0, from = '', to = '';
+    if (isWalk) {
+      var a = sg.a, b = sg.b, e = sm(t), ax = a.xo !== undefined ? a.xo : a.x;
+      x = lerp(ax, b.x, t); z = lerp(a.z, b.z, t);
+      cam = [lerp(a.camo !== undefined ? a.camo : a.cam[0], b.cam[0], e), lerp(camY(a.cam), camY(b.cam), e), lerp(a.cam[2], b.cam[2], e)];
+      dir = b.x >= ax ? 1 : -1;
+      if (Math.abs(b.x - ax) > 5) pose = mix(STAND, walkPose(x / 30), Math.min(1, t * 6, (1 - t) * 6));
+      if (b.id === 'ceiling') pose = mix(pose, { head: -28 }, sm(t));
+      if (a.id === 'ceiling') pose = mix(pose, { head: -28 }, 1 - sm(t * 3));
+      from = a.id; to = b.id;
+      if (from === 'hello') frontW = 1 - sm(rng(t, 0.05, 0.25));
+      if (to === 'bye') frontW = sm(rng(t, 0.75, 0.95));
+      st = { id: '_walk' };
+    } else { st = sg.st; x = st.x; z = st.z; cam = [st.cam[0], camY(st.cam), st.cam[2]]; if (st.id === 'hello' || st.id === 'bye') frontW = 1; }
+    var id = st.id, fx = '', fx2 = '', dsmLab = -1, dsmLabA = 0, trailA = 0, turnA = 1, wcm = 0, late = '';
 
-    if (id === 'hello') { o.front = true; o.wave = u * 12; }
-    if (st.id === '_walk' && st.from === 'hello' && t < 0.15) { o.front = true; o.wave = u * 12; }
+    // dsm: the figure walks between its three spots
+    if (id === 'dsm') {
+      var ph = Math.min(2, Math.floor(t * 3)), lt = t * 3 - ph, ww = 0;
+      x = ph > 0 ? lerp(DSM_X[ph - 1], DSM_X[ph], sm(rng(lt, 0.02, 0.3))) : DSM_X[0];
+      if (ph > 0) ww = Math.max(0, Math.min(1, lt * 12, (0.31 - lt) * 12));
+      pose = mix(STAND, ph > 0 ? walkPose(x / 30) : STAND, ww);
+      pose = mix(pose, DSM_POSES[ph], win(lt, 0.33, 0.5, 0.86, 0.98));
+      if (ph === 1) { var tw1 = win(lt, 0.33, 0.45, 0.86, 0.98); dir = tw1 < 0.5 ? 1 : -1; turnA = 0.2 + 0.8 * Math.abs(2 * tw1 - 1); } else dir = 1;
+      dsmLab = ph; dsmLabA = win(lt, 0.3, 0.45, 0.88, 1); trailA = ww;
+    }
+
+    // phone: he walks the hallway so the camera pans across the three photos
+    if (id === 'police' && mobile) {
+      x = lerp(st.x, st.xo, sm(rng(t, 0.08, 0.92)));
+      pose = mix(STAND, walkPose(x / 30), Math.min(1, rng(t, 0.05, 0.12), 1 - rng(t, 0.88, 0.95)));
+    }
+
+    // continuous vanishing point, outfit swaps hidden by a dip in opacity at the doorways
+    var vx = vxAt(x), fp = floorAt(vx, x, z);
+    var outfit = x < 1200 ? 'polo' : x < 2214 ? 'police' : x < 3660 ? 'ppe' : 'polo';
+    var o = { x: fp.x, y: fp.y, dir: dir, scale: fp.s, pose: pose, outfit: outfit };
+    var meA = Math.min(0.08 + 0.92 * sm(rng(Math.abs(x - 1200), 0, 110)), 0.08 + 0.92 * sm(rng(Math.abs(x - 2214), 0, 110))) * turnA;
+    var bonnetA = 0, engO = 0, holoO = 0, mapR = 0, doorOpen = sm(rng(x, 6900, 7060)), relax = 1;
+    var amt = {};
+    if (!isWalk) {
+      if (CW[id]) { var cwv = CW[id]; amt[id] = win(t, cwv[0], cwv[1], cwv[2], cwv[3]); }
+      if (id !== 'ceiling' && id !== 'dsm' && id !== 'hello' && id !== 'bye') relax = 1 - sm(rng(t, 0.9, 1));
+    }
+
     if (id === 'perfume') {
-      active = t > 0.15 ? 'perfume' : null;
-      var bt = Z.pickBottle, pr1 = rng(t, 0, 0.18), lift = sm(rng(t, 0.25, 0.45)), back = sm(rng(t, 0.85, 1));
-      var reachP = reachPose(o, [bt[0], bt[1] - 8], false, { lean: 8 });
-      var noseW;
-      o.pose = mix(STAND, reachP, sm(pr1));
-      var g0 = figure(o);
-      noseW = [g0.nose[0] + 6, g0.nose[1] + 4];
+      var bt = Z.pickBottle, pr1 = sm(rng(t, 0, 0.18)), lift = sm(rng(t, 0.25, 0.45)), back = sm(rng(t, 0.85, 1)), restS = F / (F + 140);
+      var noseW = [o.x + o.dir * o.scale * 14 + 6, o.y + o.scale * (SHY - 18) + 4];
       var held = [lerp(bt[0], noseW[0], lift), lerp(bt[1] - 8, noseW[1] + 10, lift)];
       if (back > 0) held = [lerp(noseW[0], bt[0], back), lerp(noseW[1] + 10, bt[1] - 8, back)];
-      if (t > 0.18) { o.pose = mix(STAND, reachPose(o, held, false, { lean: 8 - 8 * lift + 8 * back, head: lift * (1 - back) * 6 }), 1); fx2 += bottle(held[0], held[1], o.scale, -10 * lift * (1 - back)); }
-      else fx += bottle(bt[0], bt[1] - 12, F / (F + 140), 0);
+      var bs = lerp(restS, o.scale, sm(rng(t, 0.15, 0.3))); if (back > 0) bs = lerp(o.scale, restS, back);
+      o.pose = mix(STAND, reachPose(o, held, false, { lean: 8 - 8 * lift + 8 * back, head: lift * (1 - back) * 6 }), pr1);
       var mist = rng(t, 0.5, 0.72);
-      if (mist > 0 && mist < 1) { var mm = ''; for (var m = 0; m < 16; m++) { var rr = mist * 38 * ((m % 5) / 5 + 0.4); mm += cp(held[0] - o.dir * (10 + rr * Math.abs(Math.cos(m))), held[1] - 18 + rr * Math.sin(m * 2.3) * 0.5, 1.4); } fx2 += '<path d="' + mm + '" fill="' + HI + '" opacity="' + f(1 - mist) + '"/>'; }
+      if (mist > 0 && mist < 1) { var mm = ''; for (var m = 0; m < 16; m++) { var rr = mist * 38 * ((m % 5) / 5 + 0.4); mm += cp(held[0] - o.dir * (10 + rr * Math.abs(Math.cos(m))), held[1] - 18 + rr * Math.sin(m * 2.3) * 0.5, 1.4); } fx2 += '<path d="' + mm + '" fill="' + HI + '" opacity="' + f((1 - mist) * Math.min(1, mist * 8)) + '"/>'; }
+      fx2 += bottle(held[0], held[1], bs, -10 * lift * (1 - back));
+    } else if (x < 1500) {
+      var bt0 = Z.pickBottle; fx2 += bottle(bt0[0], bt0[1] - 8, F / (F + 140), 0);
     }
-    if (id === 'police') { active = 'police'; o.pose = mix(STAND, { head: -12, sN: 10 }, sm(rng(t, 0, 0.3))); }
-    if (id === 'site') { active = t > 0.15 ? 'site' : null; o.pose = mix(STAND, { head: -14, sN: 20, eN: -100, sF: -10 }, sm(rng(t, 0.1, 0.3))); }
-    var fl1 = x > 3610 && x < 4090, fl2 = x > 5230 && x < 5670;
-    if (fl1 || fl2) {
-      hidden = true;
-      var x0 = fl1 ? 3640 : 5240, x1 = fl1 ? 4060 : 5660, pt = Math.max(0, Math.min(1, (x - x0) / (x1 - x0)));
-      var px = lerp(x0, x1, pt), py = (1 - pt) * (1 - pt) * (FY - 40) + 2 * pt * (1 - pt) * (FY - 520) + pt * pt * (FY - 40);
-      var ang = Math.atan2(2 * (1 - pt) * (-480) + 2 * pt * 480, x1 - x0) * 180 / Math.PI;
-      planeEl.innerHTML = '<g transform="translate(' + f(px) + ',' + f(py - 14) + ') rotate(' + f(ang) + ') scale(1.5)">' + Z.plane + '</g>';
-      cam[0] = px; cam[1] = Math.min(cam[1], py + 40);
-    } else planeEl.innerHTML = '';
-    if (id === 'dsm') {
-      active = 'dsm';
-      var ph = Math.min(2, Math.floor(t * 3)), lt = t * 3 - ph, spots = [4300, 4640, 5000], fp2 = floorAt(4660, spots[ph], 60);
-      o.x = fp2.x; o.y = fp2.y; o.scale = fp2.s;
-      var poses = [{ sN: 150, eN: -130, head: 6 }, { sN: 40, eN: -70, sF: 30, eF: -60 }, { sN: 80, eN: -60, head: -8, sF: 70, eF: -30 }];
-      o.pose = mix(STAND, poses[ph], sm(rng(lt, 0, 0.25)) * (1 - sm(rng(lt, 0.85, 1))));
-      o.dir = ph === 1 ? -1 : 1;
-      if (lt < 0.2) { var tr = ''; for (var q = 1; q < 4; q++) tr += 'M' + f(o.x - q * 22 - 10) + ' ' + f(o.y - 120 + q * 18) + 'h-' + (40 - q * 8); fx += '<path d="' + tr + '" stroke="' + HI + '" stroke-width="1.4" fill="none"/>'; }
-      fx2 += T(o.x, o.y - 215 * o.scale, 15, ['Smelling, Shanghai', 'Client meeting, Shanghai', 'Blending, Guangzhou'][ph], HI, 'middle', 500);
-    }
-    if (x > 4100 && x < 5220) { var cl = Z.clients; [[cl[0], 1], [cl[1], -1]].forEach(function (c2) { fx += '<g transform="' + place({ x: c2[0][0], y: c2[0][1], dir: c2[1], scale: cl[2] }) + '">' + figure({ x: 0, y: 0, dir: 1, scale: 1, pose: STAND, outfit: 'polo' }).s + '</g>'; }); }
-    // football
-    if (x > 5700 && x < 7020) {
-      var pls = [floorAt(6360, 6300, 260), floorAt(6360, 6480, 200)], bp = null, gl = Z.goal;
-      var kt = id === 'kick' ? t : (st.id === '_walk' && st.from === 'kick') ? 1 : -1;
-      var passer = 1, pass2me = kt >= 0 ? sm(rng(kt, 0.05, 0.3)) : 0;
-      var rot = (u * 3) % 2, pp = sm(rot < 1 ? rot : 2 - rot);
-      pls.forEach(function (pl, n) {
-        var run = n === passer && kt >= 0 && kt < 0.08 ? { hN: 40, kN: -40, lean: -4 } : STAND;
-        fx += '<g transform="' + place({ x: pl.x, y: pl.y, dir: n ? -1 : 1, scale: pl.s }) + '">' + figure({ x: 0, y: 0, dir: 1, scale: 1, pose: mix(STAND, run, 1), outfit: 'polo' }).s + '</g>';
-      });
-      if (kt < 0) bp = [lerp(pls[0].x + 14, pls[1].x - 14, pp), lerp(pls[0].y - 8, pls[1].y - 8, pp) - Math.sin(pp * Math.PI) * 20];
-      else {
-        var myFoot = [o.x + 18, o.y - 10], shot = sm(rng(kt, 0.45, 0.78));
-        if (kt < 0.4) bp = [lerp(pls[1].x - 14, myFoot[0], pass2me), lerp(pls[1].y - 8, myFoot[1], pass2me)];
-        else bp = [lerp(myFoot[0], gl[0] - 20, shot), lerp(myFoot[1], gl[1] - 70, shot) - Math.sin(shot * Math.PI) * 110];
-        if (kt > 0.3 && kt < 0.7) { var k2 = rng(kt, 0.32, 0.5); o.pose = mix(STAND, { hN: k2 < 0.5 ? -30 * sm(k2 * 2) : lerp(-30, 70, sm((k2 - 0.5) * 2)), kN: k2 < 0.5 ? -60 * sm(k2 * 2) : -60 + 60 * sm((k2 - 0.5) * 2), sF: 30, sN: -30, lean: -4 }, 1 - sm(rng(kt, 0.6, 0.7))); }
-        if (kt > 0.8 && id === 'kick') fx2 += T(gl[0] - 40, gl[1] - 210, 26, 'Goal', HI, 'middle', 500);
+    if (id === 'police' && !mobile) o.pose = mix(STAND, { head: -12, sN: 10 }, sm(rng(t, 0, 0.3)));
+    if (id === 'site') o.pose = mix(STAND, { head: -14, sN: 20, eN: -100, sF: -10 }, sm(rng(t, 0.1, 0.3)));
+
+    // flights: the plane flies during the dwell while the figure is gone, so the two never overlap
+    var planeS = '', fKey = (id === 'fly1' || id === 'fly2') ? id : (isWalk && /^fly/.test(to)) ? to : (isWalk && /^fly/.test(from)) ? from : '';
+    if (fKey) {
+      var fr = mobile ? FL[fKey].m : FL[fKey].d, fx0 = fr[0], fx1 = fr[1];
+      meA *= 1 - sm(rng(x, fx0 - 160, fx0 - 40)) * (1 - sm(rng(x, fx1 + 40, fx1 + 160)));
+      wcm = !isWalk ? 1 : /^fly/.test(to) ? sm(rng(t, 0.5, 1)) : 1 - sm(rng(t, 0, 0.5));
+      if (!isWalk) {
+        var fpt = sm(rng(t, 0.1, 0.9)), fpA = sm(rng(t, 0, 0.1)) * (1 - sm(rng(t, 0.9, 1))), fcy = mobile ? FY - 440 : FY - 520, kq = fcy - (FY - 40);
+        var px = lerp(fx0, fx1, fpt), py = (1 - fpt) * (1 - fpt) * (FY - 40) + 2 * fpt * (1 - fpt) * fcy + fpt * fpt * (FY - 40);
+        var ang = Math.atan2(2 * kq * (1 - 2 * fpt), fx1 - fx0) * 180 / Math.PI;
+        if (fpA > 0.005) planeS = '<g opacity="' + f(fpA) + '" transform="translate(' + f(px) + ',' + f(py - 14) + ') rotate(' + f(ang) + ') scale(' + (mobile ? 1.1 : 1.5) + ')">' + Z.plane + '</g>';
       }
-      fx2 += '<circle cx="' + f(bp[0]) + '" cy="' + f(bp[1]) + '" r="11" fill="' + INK + '" stroke="' + HI + '" stroke-width="1.8"/>';
     }
-    if (id === 'pitch') { active = 'pitch'; o.pose = mix(STAND, { sN: 40, eN: -60 }, sm(rng(t, 0.1, 0.3))); }
-    if (id === 'kick') active = t > 0.85 ? 'pitch' : null;
+    if (planeS !== lastPlane) { lastPlane = planeS; planeEl.innerHTML = planeS; }
+
+    if (id === 'dsm') {
+      o.pose = pose;
+      if (trailA > 0.01) { var tr = ''; for (var q = 1; q < 4; q++) tr += 'M' + f(o.x - q * 22 - 10) + ' ' + f(o.y - 120 + q * 18) + 'h-' + (40 - q * 8); fx += '<path d="' + tr + '" stroke="' + HI + '" stroke-width="1.4" fill="none" opacity="' + f(trailA) + '"/>'; }
+      if (dsmLabA > 0.01) fx2 += '<g opacity="' + f(dsmLabA) + '">' + T(dsmLab === 1 ? o.x : DSM_CAP[dsmLab][0], 474, mobile ? 14 : 14, DSM_LAB[dsmLab], HI, DSM_CAP[dsmLab][1], 500) + '</g>';
+    }
+    // football
+    if (x > 5500 && x < 7300) {
+      var pla = sm(rng(x, 5500, 5700)) * (1 - sm(rng(x, 7000, 7300))), bla = sm(rng(x, 5500, 5700)) * (1 - sm(rng(x, 6950, 7150))), gl = Z.goal, bp;
+      var kt = id === 'kick' ? t : (isWalk && from === 'kick') ? 1 : -1;
+      var pass2me = kt >= 0 ? sm(rng(kt, 0.05, 0.3)) : 0, rot = (u * 3) % 2, pp = sm(rot < 1 ? rot : 2 - rot);
+      var runW = kt >= 0 ? sm(rng(kt, 0, 0.03)) * (1 - sm(rng(kt, 0.05, 0.1))) : 0;
+      fx += '<g opacity="' + f(pla) + '">' + PL_STAND[0] + (runW > 0.001 ? '<g transform="' + place({ x: PL[1].x, y: PL[1].y, dir: -1, scale: PL[1].s }) + '">' + figure({ x: 0, y: 0, dir: 1, scale: 1, pose: mix(STAND, RUN, runW), outfit: 'polo' }).s + '</g>' : PL_STAND[1]) + '</g>';
+      var osc = [lerp(PL[0].x + 14, PL[1].x - 14, pp), lerp(PL[0].y - 8, PL[1].y - 8, pp) - Math.sin(pp * Math.PI) * 20];
+      if (kt < 0) bp = osc;
+      else {
+        var myFoot = [o.x + 18, o.y - 10], shot = sm(rng(kt, 0.45, 0.78)), wk = sm(rng(kt, 0, 0.12));
+        var bs0 = [lerp(osc[0], PL[1].x - 14, wk), lerp(osc[1], PL[1].y - 8, wk)];
+        if (kt < 0.4) bp = [lerp(bs0[0], myFoot[0], pass2me), lerp(bs0[1], myFoot[1], pass2me)];
+        else bp = [lerp(myFoot[0], gl[0] - 20, shot), lerp(myFoot[1], gl[1] - 70, shot) - Math.sin(shot * Math.PI) * 110];
+        if (kt > 0.28 && kt < 0.72) { var k2 = rng(kt, 0.32, 0.5); o.pose = mix(STAND, { hN: k2 < 0.5 ? -30 * sm(k2 * 2) : lerp(-30, 70, sm((k2 - 0.5) * 2)), kN: k2 < 0.5 ? -60 * sm(k2 * 2) : -60 + 60 * sm((k2 - 0.5) * 2), sF: 30, sN: -30, lean: -4 }, sm(rng(kt, 0.28, 0.36)) * (1 - sm(rng(kt, 0.6, 0.7)))); }
+        if (id === 'kick') { var ga = win(kt, 0.78, 0.88, 0.93, 1); if (ga > 0.01) fx2 += '<g opacity="' + f(ga) + '">' + T(gl[0] - 40, gl[1] - 210, 26, 'Goal', HI, 'middle', 500) + '</g>'; }
+      }
+      fx2 += '<circle cx="' + f(bp[0]) + '" cy="' + f(bp[1]) + '" r="11" fill="' + INK + '" stroke="' + HI + '" stroke-width="1.8" opacity="' + f(bla) + '"/>';
+    }
+    if (id === 'pitch') o.pose = mix(STAND, { sN: 40, eN: -60 }, sm(rng(t, 0.1, 0.3)));
+    if (id === 'kick') amt.pitch = 1 - sm(rng(t, 0.82, 0.97));
+    if (isWalk && from === 'pitch') amt.pitch = 1;
     if (id === 'workshop') {
-      active = t > 0.25 ? 'workshop' : null;
       var hb = Z.holo;
-      o.pose = mix(STAND, reachPose(o, [hb[0] + 30, hb[1] - 30], false, { head: -6, lean: 4 }), sm(rng(t, 0, 0.2)) * (1 - sm(rng(t, 0.85, 1))));
-      holoO = sm(rng(t, 0.15, 0.32));
+      o.pose = mix(STAND, reachPose(o, [hb[0] + 30, hb[1] - 30], false, { head: -6, lean: 4 }), sm(rng(t, 0, 0.2)));
+      holoO = mobile ? win(t, 0.1, 0.26, 0.46, 0.6) : win(t, 0.12, 0.3, 0.88, 1);
     }
     if (id === 'bonnet') {
-      o.dir = -1;
-      var r1 = sm(rng(t, 0, 0.12)), lf = sm(rng(t, 0.12, 0.3)), cl2 = sm(rng(t, 0.88, 1));
+      var r1 = sm(rng(t, 0.05, 0.13)), lf = sm(rng(t, 0.13, 0.26)), cl2 = sm(rng(t, 0.88, 0.99)), tq = sm(rng(t, 0, 0.06));
+      o.dir = tq < 0.5 ? 1 : -1; meA *= 0.2 + 0.8 * Math.abs(2 * tq - 1);
       bonnetA = 56 * lf * (1 - cl2);
-      var edge = bonnetEdge(bonnetA);
-      var lean = 14 * (1 - lf) + 14 * cl2;
-      o.pose = mix(STAND, reachPose(o, [edge[0] + 2, edge[1] + 2], true, { lean: lean, head: -6 * lf }), r1);
-      engO = sm(rng(t, 0.3, 0.42)) * (1 - sm(rng(t, 0.8, 0.88)));
-      if (engO > 0) { var ec = [CARX, -560 + EH / 2 - 30, 1720]; cam = [lerp(cam[0], ec[0], engO), lerp(cam[1], ec[1], engO), lerp(cam[2], mobile ? 2600 : ec[2], engO)]; }
-      active = (t > 0.04 && t < 0.3) || t > 0.9 ? 'bonnet' : null;
+      if (r1 > 0.001) {
+        var edge = bonnetEdge(bonnetA), lean = 14 * (1 - lf) + 14 * cl2;
+        o.pose = mix(STAND, reachPose(o, [edge[0] + 2, edge[1] + 2], true, { lean: lean, head: -6 * lf }), r1);
+      }
+      engO = sm(rng(t, 0.24, 0.52)) * (1 - sm(rng(t, 0.68, 0.86)));
+      amt.bonnet = Math.max(win(t, 0.02, 0.07, 0.19, 0.25), win(t, 0.88, 0.92, 0.985, 1));
     }
-    if (id === 'ceiling') { active = t > 0.35 ? 'ceiling' : null; o.pose = mix(STAND, { head: -28 }, 1); mapR = sm(rng(t, 0, 0.4)); }
-    if (st.id === '_walk' && st.to === 'ceiling') mapR = sm(rng(t, 0.4, 1));
-    if (st.id === '_walk' && st.from === 'ceiling') mapR = 1 - sm(t * 3);
-    if (id === 'bye') {
-      o.front = true; o.wave = u * 12;
-      var bx = mobile ? o.x - 150 : o.x + 50;
-      fx2 += bubble(bx, o.y - 330, 300, ['Thanks for walking through.', 'Scroll down for the details.'], false);
-      if (t > 0.45) fx2 += '<g opacity="' + f(sm(rng(t, 0.45, 0.6))) + '">' + P(cp(o.x - 40, o.y - 210, 4) + cp(o.x - 58, o.y - 236, 7), 1.2, HI) + bubble(mobile ? o.x - 150 : o.x - 380, mobile ? o.y - 450 : o.y - 340, mobile ? 300 : 330, ['Next: Shopee SPX Express', 'Business development, Jan 2027'], true) + '</g>';
-    }
-    if (id === 'hello') fx2 += bubble(mobile ? o.x - 145 : o.x + 40, o.y - 320, 290, ["Hi, I'm Sanjith.", 'Scroll to walk through my work.'], false);
+    if (isWalk && to === 'bonnet') { /* arrives facing right, turns at the start of the dwell */ }
+    if (engO > 0) cam = [lerp(cam[0], ecam[0], engO), lerp(cam[1], ecam[1], engO), lerp(cam[2], ecam[2], engO)];
+    if (id === 'ceiling') { o.pose = mix(STAND, { head: -28 }, 1); mapR = 1; }
+    if (isWalk && to === 'ceiling') mapR = sm(rng(t, 0.4, 1));
+    if (isWalk && from === 'ceiling') mapR = 1 - sm(t * 3);
+    if (relax < 1) o.pose = mix(STAND, o.pose, relax);
 
-    if (mobile && !hidden && engO < 0.05 && id !== 'ceiling' && !(st.id === '_walk' && (st.to === 'ceiling' || st.from === 'ceiling'))) cam[0] = cam[0] * 0.25 + o.x * 0.75;
-    // draw
-    if (hidden) meEl.innerHTML = '';
-    else { var g = figure(o); meEl.innerHTML = g.s; meEl.setAttribute('transform', o.front ? 'translate(' + f(o.x) + ',' + f(o.y) + ') scale(' + f(o.scale) + ')' : place(o)); }
-    if (holoO > 0) {
-      var hp = Z.holo, hs = hp[2] * 1.6, blink = 0.6 + 0.4 * Math.sin(u * 30);
-      fx2 += '<g opacity="' + f(holoO) + '" transform="translate(' + f(hp[0]) + ',' + f(hp[1] - 70 * hp[2]) + ') scale(' + f(hs) + ')">' + '<path d="M-14 -10h28v18h-28zM-14 -10l14 10l14 -10" stroke="' + HI + '" stroke-width="1.4" fill="none" opacity="' + f(blink) + '"/>' + '</g>';
-      fx2 += '<g opacity="' + f(holoO) + '">' + bubble(hp[0] - 120, hp[1] - 190, 240, ['Inbox summary', '3 new, 1 urgent'], false) + '<path d="M' + f(hp[0]) + ' ' + f(hp[1] - 118) + 'v26" stroke="' + HI + '" stroke-dasharray="3 4"/></g>';
+    // phone: the workshop camera pans along the bench while he stays by the door
+    var wsT = id === 'workshop' ? 1 : (isWalk && to === 'workshop') ? sm(rng(t, 0.6, 1)) : (isWalk && from === 'workshop') ? 1 - sm(rng(t, 0, 0.4)) : 0;
+    if (mobile && id === 'workshop') cam[0] = lerp(SB.workshop.cam[0], SB.workshop.camo, sm(rng(t, 0.25, 0.92)));
+    if (mobile) { var fw = 0.75 * (1 - engO) * (1 - mapR) * (1 - wcm) * (1 - wsT); cam[0] = cam[0] * (1 - fw) + o.x * fw; }
+
+    // speech bubbles are placed last, inside the final view and clear of the top bar
+    var vcw = camW(cam[2]), vch = vcw * H / W, vx0 = cam[0] - vcw / 2, vy0 = cam[1] - vch / 2, topS = vy0 + (barPx + 12) * vch / H, kpx = vcw / W;
+    function clampB(bx, by, bw, bh) { return [Math.max(vx0 + 14 * kpx, Math.min(vx0 + vcw - 14 * kpx - bw, bx)), Math.max(topS, Math.min(vy0 + vch - bh - 10 * kpx, by))]; }
+    if (id === 'hello') { var ha = 1 - sm(rng(u, 0.6, 1)); if (ha > 0.01) { var hb1 = clampB(mobile ? o.x - 145 : o.x - 60, o.y - 320, 290, 72); late += '<g opacity="' + f(ha) + '">' + T(Z.monLab[0], Z.monLab[1], 13, 'Shopee, Lazada, Shopify', LN) + bubble(hb1[0], hb1[1], 290, ["Hi, I'm Sanjith.", 'Scroll to walk through my work.'], false) + '</g>'; } }
+    if (id === 'bye' || (isWalk && to === 'bye')) {
+      var b1 = sm(rng(u, byeStart - 0.35, byeStart + 0.25)), b2 = sm(rng(u, byeStart + 0.3, byeStart + 0.55)), headT = o.y - 180 * o.scale, bhh = 72, q1, q2;
+      if (mobile) { q2 = clampB(cam[0] - 150, headT - 60 - bhh, 300, bhh); q1 = clampB(cam[0] - 150, q2[1] - 18 - bhh, 300, bhh); }
+      else { q1 = clampB(o.x + 45, o.y - 300, 300, bhh); q2 = clampB(o.x - 345, o.y - 300, 290, bhh); }
+      if (b1 > 0.01) late += '<g opacity="' + f(b1) + '">' + bubble(q1[0], q1[1], 300, ['Thanks for walking through.', 'Scroll down for the details.'], false) + '</g>';
+      if (b2 > 0.01) {
+        var sx0 = o.x - (mobile ? 10 : 24), sy0 = headT - 8, ex0 = mobile ? q2[0] + 150 : q2[0] + 250, ey0 = q2[1] + bhh + 8;
+        late += '<g opacity="' + f(b2) + '">' + P(cp(lerp(sx0, ex0, 0.3), lerp(sy0, ey0, 0.3), 4) + cp(lerp(sx0, ex0, 0.62), lerp(sy0, ey0, 0.62), 7), 1.2, HI) + bubble(q2[0], q2[1], mobile ? 300 : 290, ['Next: Shopee SPX Express', 'Business development, Jan 2027'], true) + '</g>';
+      }
     }
-    fxEl.innerHTML = fx; fx2El.innerHTML = fx2;
+    if (holoO > 0.005) {
+      var hp = Z.holo, hs = hp[2] * 1.6, blink = 0.6 + 0.4 * Math.sin(u * 30), hq = clampB(mobile ? hp[0] - 120 : hp[0] - 48, hp[1] - 190, 240, 72), ey = hp[1] - 88;
+      late += '<g opacity="' + f(holoO) + '" transform="translate(' + f(hp[0]) + ',' + f(ey) + ') scale(' + f(hs) + ')">' + '<path d="M-14 -10h28v18h-28zM-14 -10l14 10l14 -10" stroke="' + HI + '" stroke-width="1.4" fill="none" opacity="' + f(blink) + '"/>' + '</g>';
+      late += '<g opacity="' + f(holoO) + '">' + bubble(hq[0], hq[1], 240, ['Inbox summary', '3 new, 1 urgent'], false) + '<path d="M' + f(hp[0]) + ' ' + f(hq[1] + 72) + 'V' + f(ey - 12) + '" stroke="' + HI + '" stroke-dasharray="3 4"/></g>';
+    }
+    fx2 += late;
+
+    // draw the figure, front and side views crossfading
+    var meS = '';
+    if (meA > 0.01) {
+      var sd = Math.abs(o.dir) < 0.04 ? (o.dir < 0 ? -0.04 : 0.04) : o.dir;
+      if (frontW < 0.999) meS += '<g transform="scale(' + f(sd * o.scale) + ',' + f(o.scale) + ')">' + figure(o).s + '</g>';
+      if (frontW > 0.001) meS += '<g' + (frontW < 0.999 ? ' opacity="' + f(frontW) + '"' : '') + ' transform="scale(' + f(o.scale) + ')">' + figure({ front: true, wave: u * 12, x: o.x, y: o.y, scale: o.scale }).s + '</g>';
+    }
+    if (meS !== lastMe) { lastMe = meS; meEl.innerHTML = meS; }
+    setA(meEl, 'transform', 'translate(' + f(o.x) + ',' + f(o.y) + ')');
+    setA(meEl, 'opacity', f(Math.min(1, meA)));
+    if (fx !== lastFx) { lastFx = fx; fxEl.innerHTML = fx; }
+    if (fx2 !== lastFx2) { lastFx2 = fx2; fx2El.innerHTML = fx2; }
     setCam(cam[0], cam[1], cam[2]);
-    bonnetEl.setAttribute('transform', 'rotate(' + f(-bonnetA) + ' 333 -92)');
-    engSide.setAttribute('opacity', f(Math.min(1, bonnetA / 30)));
-    engEl.setAttribute('opacity', f(engO));
+    setA(bonnetEl, 'transform', 'rotate(' + f(-bonnetA) + ' 333 -92)');
+    setA(engSide, 'opacity', f(Math.min(1, bonnetA / 30)));
+    setA(engEl, 'opacity', f(sm(rng(engO, 0.3, 0.85))));
+    // the panel never rides up under the top bar while it zooms in or out
+    setA(engEl, 'transform', 'translate(0,' + f(Math.max(0, view.y + (barPx + 12) / H * view.h - (EY - 56))) + ')');
     // inward opening doors on the garage left wall
-    var gpz = proj(GVX), dd = '', th = rad(80 * doorOpen);
-    [[140, 1], [360, -1]].forEach(function (lf2) {
-      var zh = lf2[0], sgn = lf2[1], L = 110, xf = 7020 + Math.sin(th) * L, zf = zh + sgn * Math.cos(th) * L;
-      dd += P(poly(gpz, [[7020, FY, zh], [7020, FY - 260, zh], [xf, FY - 260, zf], [xf, FY, zf]], true), 1.6, LN);
-      dd += P(seg(gpz, [7020 + Math.sin(th) * L * 0.5, FY - 250, zh + sgn * Math.cos(th) * L * 0.5], [7020 + Math.sin(th) * L * 0.5, FY - 10, zh + sgn * Math.cos(th) * L * 0.5]), 0.6);
-    });
-    doorsEl.innerHTML = dd; doorsEl.style.setProperty('--r', 1);
+    var dk = f(doorOpen);
+    if (dk !== lastDoor) {
+      lastDoor = dk;
+      var gpz = proj(GVX), dd = '', th = rad(80 * doorOpen);
+      [[140, 1], [360, -1]].forEach(function (lf2) {
+        var zh = lf2[0], sgn = lf2[1], L = 110, xf = 7020 + Math.sin(th) * L, zf = zh + sgn * Math.cos(th) * L;
+        dd += P(poly(gpz, [[7020, FY, zh], [7020, FY - 260, zh], [xf, FY - 260, zf], [xf, FY, zf]], true), 1.6, LN);
+        dd += P(seg(gpz, [7020 + Math.sin(th) * L * 0.5, FY - 250, zh + sgn * Math.cos(th) * L * 0.5], [7020 + Math.sin(th) * L * 0.5, FY - 10, zh + sgn * Math.cos(th) * L * 0.5]), 0.6);
+      });
+      doorsEl.innerHTML = dd;
+    }
     // map, faded in, pins after
-    mapEl.setAttribute('opacity', f(mapR));
+    setA(mapEl, 'opacity', f(mapR));
+    var pins = '';
     if (mapR > 0.6) {
-      var pins = '', c = M.c, home = [MAPX + c.Singapore[0] * mk, MAPY + c.Singapore[1] * mk], pr2 = sm(rng(mapR, 0.6, 1));
+      var c = M.c, home = [MAPX + c.Singapore[0] * mk, MAPY + c.Singapore[1] * mk], pr2 = sm(rng(mapR, 0.6, 1)), mf = mapMf;
       var labels = { Singapore: 'Singapore, home base', Shanghai: 'Shanghai', Guangzhou: 'Guangzhou', Dubai: 'Dubai, Beautyworld' };
       Object.keys(c).forEach(function (kk) {
         var cc = [MAPX + c[kk][0] * mk, MAPY + c[kk][1] * mk];
-        if (kk !== 'Singapore') pins += '<path d="M' + f(home[0]) + ' ' + f(home[1]) + 'Q' + f((home[0] + cc[0]) / 2) + ' ' + f(Math.min(home[1], cc[1]) - 120) + ' ' + f(cc[0]) + ' ' + f(cc[1]) + '" stroke="' + HI + '" stroke-width="1.4" fill="none" stroke-dasharray="6 6" opacity="' + f(pr2) + '"/>';
-        pins += '<circle cx="' + f(cc[0]) + '" cy="' + f(cc[1]) + '" r="' + f(8 * pr2) + '" fill="' + HI + '"/>';
-        var left = kk === 'Guangzhou';
-        pins += '<text x="' + f(cc[0] + (left ? -14 : 14)) + '" y="' + f(cc[1] + 5) + '" font-size="17" fill="' + HI + '" text-anchor="' + (left ? 'end' : 'start') + '" opacity="' + f(pr2) + '" font-family="Hanken Grotesk, sans-serif">' + labels[kk] + '</text>';
+        if (kk !== 'Singapore') pins += '<path d="M' + f(home[0]) + ' ' + f(home[1]) + 'Q' + f((home[0] + cc[0]) / 2) + ' ' + f(Math.min(home[1], cc[1]) - 120 * mf) + ' ' + f(cc[0]) + ' ' + f(cc[1]) + '" stroke="' + HI + '" stroke-width="' + f(1.4 * mf) + '" fill="none" stroke-dasharray="' + f(6 * mf) + ' ' + f(6 * mf) + '" opacity="' + f(pr2) + '"/>';
+        pins += '<circle cx="' + f(cc[0]) + '" cy="' + f(cc[1]) + '" r="' + f(8 * mf * pr2) + '" fill="' + HI + '"/>';
+        var left = kk === 'Guangzhou' || (mobile && (kk === 'Dubai' || kk === 'Singapore')), ly2 = cc[1] + 5 * mf + (mobile && kk === 'Singapore' ? 24 * mf : 0);
+        pins += '<text x="' + f(cc[0] + (left ? -14 : 14) * mf) + '" y="' + f(ly2) + '" font-size="' + f(17 * mf) + '" fill="' + HI + '" text-anchor="' + (left ? 'end' : 'start') + '" opacity="' + f(pr2) + '" font-family="Hanken Grotesk, sans-serif">' + labels[kk] + '</text>';
       });
-      pinsEl.innerHTML = pins;
-    } else pinsEl.innerHTML = '';
+    }
+    if (pins !== lastPins) { lastPins = pins; pinsEl.innerHTML = pins; }
     // reveal drawings near the camera
     var cxm = view.x + view.w / 2;
     zoneEls.forEach(function (el, n) {
       var a0 = +el.dataset.x0, a1 = +el.dataset.x1, dist = cxm < a0 ? a0 - cxm : cxm > a1 ? cxm - a1 : 0;
       var r = 1 - Math.max(0, Math.min(1, (dist - view.w * 0.2) / (view.w * 0.5)));
       if (r > reveal[n]) reveal[n] = r;
-      el.style.setProperty('--r', f(sm(reveal[n])));
+      var rv = sm(reveal[n]); if (el.classList.contains('fz')) rv = rng(sm(r), 0.6, 1); rv = f(rv);
+      if (rv !== lastR[n]) { lastR[n] = rv; el.style.setProperty('--r', rv); }
     });
-    // cards
-    Object.keys(cardEls).forEach(function (k) {
-      var el = cardEls[k], on = active === k;
-      el.classList.toggle('on', on);
-      if (!on) return;
+    // cards: opacity follows scroll directly, no timers
+    cardKeys.forEach(function (k) {
+      var el = cardEls[k], a = amt[k] || 0, was = cardLast[k] === 'on';
+      var on = was ? a > 0.3 : a > 0.65;
+      if (a < 0.01) { if (cardLast[k] !== 'off') { cardLast[k] = 'off'; el.style.opacity = 0; el.style.visibility = 'hidden'; el.classList.remove('on'); } return; }
+      var key = on ? 'on' : 'part';
+      el.style.pointerEvents = a > 0.6 ? 'auto' : 'none';
+      el.style.visibility = 'visible'; el.style.opacity = f(a); el.style.transform = 'translateY(' + f((1 - a) * 8) + 'px)';
+      if (cardLast[k] !== key) { cardLast[k] = key; el.classList.toggle('on', on); }
       if (mobile) { el.style.top = 'auto'; el.style.bottom = '20px'; return; }
       var an = toScreen(o.x, o.y - 270 * o.scale);
       if (k === 'ceiling') an = [W * 0.2, H * 0.84];
-      if (k === 'workshop') an = toScreen(Z.holo[0] + 300, Z.holo[1] - 80);
+      var cwid = el.offsetWidth || 340, cx0 = null, cy0 = null;
+      if (k === 'workshop') { cx0 = toScreen(o.x, 0)[0] + 70; cy0 = toScreen(0, 622)[1]; }
+      if (k === 'perfume') { cx0 = toScreen(o.x, 0)[0] - 70 - cwid; cy0 = barPx + 22; }
       if (k === 'site') an = toScreen(o.x + 360, o.y - 330);
-      var lx = Math.max(20, Math.min(W - 360, an[0] - 170)), ly = Math.max(80, Math.min(H - 200, an[1] - 150));
+      if (k === 'dsm') an = toScreen(4560, FY - 330 * F / (F + 60));
+      var lx = Math.max(20, Math.min(W - cwid - 20, cx0 !== null ? cx0 : an[0] - 170)), ly = Math.max(barPx + 14, Math.min(H - 200, cy0 !== null ? cy0 : an[1] - 150));
       el.style.left = lx + 'px'; el.style.top = ly + 'px'; el.style.bottom = 'auto';
     });
-    if (heroEl) heroEl.style.opacity = f(1 - sm(u / 0.6));
-    if (barEl) barEl.style.transform = 'scaleX(' + f(u / total) + ')';
+    if (heroEl) { var hv = f(1 - sm(u / 0.6)); if (heroEl._o !== hv) { heroEl._o = hv; heroEl.style.opacity = hv; } }
+    if (barEl) { var bv = 'scaleX(' + f(u / total) + ')'; if (barEl._t !== bv) { barEl._t = bv; barEl.style.transform = bv; } }
   }
 
-  var ticking = false, lastU = -1;
+  // ---------- scroll, damped ----------
+  var TAU = 0.11, target = 0, shown = 0, raf = 0, lastT = 0;
+  var reduce = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   function progress() { var r = walk.getBoundingClientRect(), span = r.height - window.innerHeight; return Math.max(0, Math.min(1, -r.top / span)) * total; }
-  function tick() { ticking = false; var u = progress(); if (Math.abs(u - lastU) > 0.0005) { lastU = u; frame(u); } }
-  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(tick); } }, { passive: true });
-  window.addEventListener('resize', function () { resize(); lastU = -1; tick(); });
+  function offscreen() { var r = walk.getBoundingClientRect(); return r.bottom < 0 || r.top > window.innerHeight; }
+  function loop(now) {
+    var dt = lastT ? Math.min(0.1, (now - lastT) / 1000) : 1 / 60; lastT = now;
+    var stp = (target - shown) * (1 - Math.exp(-dt / TAU)), cap = 0.12 * dt * 60;
+    shown += Math.max(-cap, Math.min(cap, stp));
+    if (Math.abs(target - shown) < 0.0006) { shown = target; raf = 0; lastT = 0; frame(shown); return; }
+    frame(shown); raf = requestAnimationFrame(loop);
+  }
+  function onScroll() {
+    target = progress();
+    if (reduce.matches || offscreen()) { shown = target; if (raf) { cancelAnimationFrame(raf); raf = 0; lastT = 0; } frame(shown); return; }
+    if (!raf && Math.abs(target - shown) >= 0.0006) { lastT = 0; raf = requestAnimationFrame(loop); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', function () { resize(); target = shown = progress(); frame(shown); });
   resize();
-  frame(progress());
-  window.__walk = { total: total, segs: segs, frame: frame };
+  target = shown = progress();
+  frame(shown);
+  window.__walk = { total: total, segs: segs, frame: frame, state: function () { return { target: target, shown: shown, raf: !!raf }; } };
 })();

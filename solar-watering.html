@@ -7,6 +7,7 @@
   <title>Solar watering retrofit | Sanjith B.K.</title>
   <meta name="description" content="Converted a battery-powered drip watering unit to solar, in a 3D-printed rainproof case that hangs from a branch.">
   <link rel="stylesheet" href="styles.css">
+  <script>window.__rm=function(i){var w=i.closest('.lead-pic,.shot,.pic,figure');if(!w)return;var p=w.parentNode;w.remove();if(p&&p.classList.contains('shots')){var n=p.children.length;if(!n)p.remove();else if(n===1)p.classList.add('one');}};</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -25,7 +26,7 @@
       <p class="lede">Converted a battery-powered drip watering unit to solar, in a 3D-printed rainproof case that hangs from a branch.</p>
       <dl class="specs"><div><dt>Type</dt><dd>Retrofit</dd></div><div><dt>Panel</dt><dd>6 V, 1 W</dd></div><div><dt>Enclosure</dt><dd>Printed PLA</dd></div><div><dt>Status</dt><dd>Working</dd></div></dl>
       <div class="case">
-  <div class="lead-pic"><div class="shot" data-hint="Photo to add: the finished device on a branch (save as solar-watering.jpg)"><img src="solar-watering.jpg" alt="Solar watering retrofit" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></div></div>
+  <div class="lead-pic"><div class="shot"><img src="solar-watering.jpg" alt="Solar watering retrofit" data-opt onerror="__rm(this)"></div></div>
 <section class="section"><h2>The problem</h2><div class="prose"><p>I bought an automatic drip watering system online. It ran on a 3.7 V battery that lasted up to two months between charges, so someone had to remember to take it down and charge it. I wanted it to look after itself.</p></div></section>
 <section class="section"><h2>The build</h2><div class="prose"><ul class="plain">
 <li><strong>Power:</strong> 6 V 1 W solar panel feeding a PWM charge controller and a rechargeable lithium cell</li>
@@ -33,17 +34,18 @@
 <li><strong>Enclosure:</strong> designed in Fusion 360 and printed in PLA, with the panel as an overhanging canopy so rain runs off and the display and buttons stay usable</li>
 <li><strong>Mounting:</strong> hangs from a branch, with the pipe exits on the underside</li>
 </ul>
-<div class="shots"><div class="shot empty" data-hint="Image to add: enclosure in Fusion 360"></div><div class="shot empty" data-hint="Photo to add: installed outdoors"></div></div></div></section>
-<section class="section"><h2>What went wrong</h2><div class="prose"><p>My first battery, a small 400 mAh cell, cut out as soon as the pump started. The pump pulls about 1.27 A, roughly three times the cell's rated capacity, and the cell couldn't supply current that fast. The motor tested fine on its own, so the fault was the power source.</p>
+</div></section>
+<section class="section"><h2>What went wrong</h2><div class="prose"><p>My first battery, a small 400 mAh cell, cut out as soon as the pump started. The pump pulls about 1.27 A, roughly three times the cell's rated capacity, and the cell could not supply current that fast. The motor tested fine on its own, so the fault was the power source.</p>
 <p>Lesson: <strong>size a battery for peak current, not just total energy.</strong> A cell can hold enough charge for the day and still be unable to deliver it fast enough.</p></div></section>
 
 
-        <section class="section"><nav class="pager" aria-label="More projects"><a href="holographic.html"><small>Previous</small><span class="t">Holographic email notifier</span></a><a class="nx" href="ae111.html"><small>Next</small><span class="t">Toyota Corolla AE111</span></a></nav></section>
+        <section class="section"><nav class="pager" aria-label="More projects"><a href="holographic.html"><small>Previous</small><span class="t">Holographic email summariser</span></a><a class="nx" href="ae111.html"><small>Next</small><span class="t">Toyota Corolla AE111</span></a></nav></section>
       </div>
 
       <footer class="foot"><span>Sanjith Bangalore Kumaraswamy</span><span>Based in Singapore</span></footer>
     </div>
   </main>
 </div>
+<script>document.querySelectorAll('img[data-opt]').forEach(function(i){if(i.complete&&!i.naturalWidth)__rm(i)});</script>
 </body>
 </html>

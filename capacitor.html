@@ -7,6 +7,7 @@
   <title>Variable capacitor | Sanjith B.K.</title>
   <meta name="description" content="A hand-built capacitor tunable from 2 to 40 nF, measured to within ± 2 nF. Awarded highest marks.">
   <link rel="stylesheet" href="styles.css">
+  <script>window.__rm=function(i){var w=i.closest('.lead-pic,.shot,.pic,figure');if(!w)return;var p=w.parentNode;w.remove();if(p&&p.classList.contains('shots')){var n=p.children.length;if(!n)p.remove();else if(n===1)p.classList.add('one');}};</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -25,10 +26,10 @@
       <p class="lede">A hand-built capacitor tunable from 2 to 40 nF, measured to within ± 2 nF. Awarded highest marks.</p>
       <dl class="specs"><div><dt>Type</dt><dd>Coursework</dd></div><div><dt>Range</dt><dd>2 to 40 nF</dd></div><div><dt>Accuracy</dt><dd>± 2 nF</dd></div><div><dt>Grade</dt><dd>Highest marks</dd></div></dl>
       <div class="case">
-  <div class="lead-pic"><div class="shot" data-hint="Photo to add: the finished capacitor (save as capacitor.jpg)"><img src="capacitor.jpg" alt="Variable capacitor" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></div></div>
+  <div class="lead-pic"><div class="shot"><img src="capacitor.jpg" alt="Variable capacitor" data-opt onerror="__rm(this)"></div></div>
 <section class="section"><h2>The brief</h2><div class="prose"><p>Design and build a capacitor whose value can be adjusted across a set range, then show that the measured values match what you designed for. Making something that changes capacitance is the easy part. <strong>Making it read accurately across the whole range</strong> is where most attempts fall short.</p></div></section>
 <section class="section"><h2>The approach</h2><div class="prose"><p>A capacitor's value depends on how much the plates overlap, the gap between them and the material in between. I worked out the expected capacitance at points across the range, built the device, measured it, and adjusted until the measured values lined up with the calculated ones.</p>
-<div class="shots"><div class="shot empty" data-hint="Photo to add: plates and adjustment"></div><div class="shot empty" data-hint="Photo to add: meter readings"></div></div></div></section>
+</div></section>
 <section class="section"><h2>Results</h2><div class="prose"><table class="results">
 <tr><td>Range achieved</td><td>2 nF to 40 nF</td></tr>
 <tr><td>Measured accuracy</td><td><strong>± 2 nF</strong></td></tr>
@@ -44,5 +45,6 @@
     </div>
   </main>
 </div>
+<script>document.querySelectorAll('img[data-opt]').forEach(function(i){if(i.complete&&!i.naturalWidth)__rm(i)});</script>
 </body>
 </html>

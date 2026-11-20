@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#23211D">
-  <title>Holographic email notifier | Sanjith B.K.</title>
+  <title>Holographic email summariser | Sanjith B.K.</title>
   <meta name="description" content="An ambient clock that shows priority email alerts as a floating image, using the Pepper's Ghost effect.">
   <link rel="stylesheet" href="styles.css">
+  <script>window.__rm=function(i){var w=i.closest('.lead-pic,.shot,.pic,figure');if(!w)return;var p=w.parentNode;w.remove();if(p&&p.classList.contains('shots')){var n=p.children.length;if(!n)p.remove();else if(n===1)p.classList.add('one');}};</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -21,11 +22,11 @@
 
       <a class="back" href="projects.html">Back to projects</a>
       <p class="kind">SUTD coursework, team</p>
-      <h1 class="p-title">Holographic email notifier</h1>
+      <h1 class="p-title">Holographic email summariser</h1>
       <p class="lede">An ambient clock that shows priority email alerts as a floating image, using the Pepper's Ghost effect.</p>
       <dl class="specs"><div><dt>Role</dt><dd>Team member</dd></div><div><dt>Hardware</dt><dd>Raspberry Pi 4</dd></div><div><dt>Optics</dt><dd>Pepper's Ghost, 35°</dd></div><div><dt>Software</dt><dd>Python</dd></div></dl>
       <div class="case">
-  <div class="lead-pic"><div class="shot" data-hint="Add image.png (save as image.png)"><img src="image.png" alt="Holographic email notifier" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></div></div>
+  <div class="lead-pic"><div class="shot"><img src="image.png" alt="Holographic email summariser" data-opt onerror="__rm(this)"></div></div>
 <section class="section"><h2>The problem</h2><div class="prose"><p>At home you either keep your phone close and get pulled into every notification, or put it away and risk missing something urgent. We wanted a way to surface only the emails that matter, without a screen demanding attention.</p></div></section>
 <section class="section"><h2>The approach</h2><div class="prose"><p>We used the <strong>Pepper's Ghost effect</strong>, an old stage illusion where an angled transparent surface reflects a screen below it so the image seems to float. Most of the time the device shows a clock. When a priority email arrives, an alert appears in the same floating display.</p>
 <ul class="plain">
@@ -33,7 +34,7 @@
 <li><strong>Compute:</strong> Raspberry Pi 4 (4 GB) running Python</li>
 <li><strong>Email:</strong> filtered so only priority messages trigger an alert</li>
 </ul>
-<div class="shots"><div class="shot empty" data-hint="Diagram to add: how the reflection works"></div><div class="shot empty" data-hint="Photo to add: internals"></div></div></div></section>
+</div></section>
 <section class="section"><h2>Testing</h2><div class="prose"><p>We settled on 35° through testing, balancing how clearly the image floats against how compact and stable the device sits on a shelf. We also checked how readable alerts were at a glance from across a room.</p></div></section>
 
 
@@ -44,5 +45,6 @@
     </div>
   </main>
 </div>
+<script>document.querySelectorAll('img[data-opt]').forEach(function(i){if(i.complete&&!i.naturalWidth)__rm(i)});</script>
 </body>
 </html>

@@ -7,6 +7,7 @@
   <title>Solar food dryer | Sanjith B.K.</title>
   <meta name="description" content="A low-cost drying box with an exhaust fan that only runs when the air inside is humid enough to be worth moving.">
   <link rel="stylesheet" href="styles.css">
+  <script>window.__rm=function(i){var w=i.closest('.lead-pic,.shot,.pic,figure');if(!w)return;var p=w.parentNode;w.remove();if(p&&p.classList.contains('shots')){var n=p.children.length;if(!n)p.remove();else if(n===1)p.classList.add('one');}};</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -25,13 +26,13 @@
       <p class="lede">A low-cost drying box with an exhaust fan that only runs when the air inside is humid enough to be worth moving.</p>
       <dl class="specs"><div><dt>My role</dt><dd>Prototyping, electronics</dd></div><div><dt>Budget</dt><dd>$100 for the group</dd></div><div><dt>Controller</dt><dd>ESP32-S3</dd></div><div><dt>Mean result</dt><dd>8.52 g in 40 min</dd></div></dl>
       <div class="case">
-  <div class="lead-pic"><div class="shot" data-hint="Photo to add: the dryer outdoors during testing (save as solar-dryer.jpg)"><img src="solar-dryer.jpg" alt="Solar food dryer" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></div></div>
+  <div class="lead-pic"><div class="shot"><img src="solar-dryer.jpg" alt="Solar food dryer" data-opt onerror="__rm(this)"></div></div>
 <section class="section"><h2>The brief</h2><div class="prose"><p>Design Thinking Project III ties together Designing Energy Systems and Modelling Uncertainty. The task was a solar-powered food drying device, tested outdoors between 9am and 11am and judged on grams of water removed from a wet sponge.</p>
 <ul class="plain"><li>$100 budget for the group</li><li>No larger than 75 × 75 cm</li><li>Target: at least 4.0 g of water removed in 30 minutes</li></ul></div></section>
 <section class="section"><h2>The build</h2><div class="prose"><p>The enclosure is a styrofoam box used as a frame, with acrylic windows on the two long sides and the top to let light in and keep heat trapped. The internal chamber is 36.5 × 19.0 × 17.0 cm.</p>
 <p>I did the prototyping and electronics. Instead of running the fan nonstop, an ESP32-S3 reads humidity inside the box and switches the exhaust fan <strong>on at 50% and off at 35%</strong> relative humidity. The gap between the two stops the fan flickering on and off. The firmware also logs every reading to CSV so we could analyse each run afterwards.</p>
 <p>We ruled out mirrors to concentrate sunlight because of the risk of scorching the sample.</p>
-<div class="shots"><div class="shot empty" data-hint="Photo to add: enclosure and windows"></div><div class="shot empty" data-hint="Photo to add: ESP32-S3 and fan wiring"></div></div></div></section>
+</div></section>
 <section class="section"><h2>Results</h2><div class="prose"><table class="results">
 <tr><td>Original design</td><td>4.2 g in 30 min</td></tr>
 <tr><td>Modified design</td><td>7.1 g in 30 min, 13.4 g in 60 min</td></tr>
@@ -42,12 +43,13 @@
 <section class="section"><h2>What I took away</h2><div class="prose"><p>Repeating trials and putting a confidence interval on the result changed how we talked about the design. "It works" became "it works this well, this reliably", which is a far more useful thing to tell someone deciding whether to use it.</p></div></section>
 
 
-        <section class="section"><nav class="pager" aria-label="More projects"><a href="fragrance-castle.html"><small>Previous</small><span class="t">Fragrance Castle</span></a><a class="nx" href="capacitor.html"><small>Next</small><span class="t">Variable capacitor</span></a></nav></section>
+        <section class="section"><nav class="pager" aria-label="More projects"><a href="swiftpack.html"><small>Previous</small><span class="t">SwiftPack</span></a><a class="nx" href="capacitor.html"><small>Next</small><span class="t">Variable capacitor</span></a></nav></section>
       </div>
 
       <footer class="foot"><span>Sanjith Bangalore Kumaraswamy</span><span>Based in Singapore</span></footer>
     </div>
   </main>
 </div>
+<script>document.querySelectorAll('img[data-opt]').forEach(function(i){if(i.complete&&!i.naturalWidth)__rm(i)});</script>
 </body>
 </html>

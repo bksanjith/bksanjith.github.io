@@ -249,7 +249,7 @@ table.results tr:last-child td { border-bottom: 1px solid var(--rule); }
 #about { scroll-margin-top: 3rem; }
 
 /* v6 additions */
-#world .tr { opacity: var(--r, 0); transition: opacity .2s linear; }
+#world .tr { opacity: var(--r, 0); }
 #world .bub .t, #fx2 .t { opacity: 1; }
 .w-top nav a.w-skip { color: var(--stone); border: 1px solid var(--sand); padding: 0.35rem 0.8rem; border-radius: 999px; }
 .w-top nav a.w-skip:hover { background: var(--sand); color: var(--ink); }
@@ -279,4 +279,58 @@ table.results tr:last-child td { border-bottom: 1px solid var(--rule); }
   .w-top nav a.w-skip { order: -1; }
   #walk-hero { top: 6.2rem; }
   #walk-hero p { font-size: 0.98rem; }
+}
+
+/* solid band behind the top bar so drawn content never collides with the name */
+.w-top { background: linear-gradient(to bottom, var(--ink) 0, var(--ink) 74%, rgba(35, 33, 29, 0) 100%); }
+/* cards fade with the scroll position itself, not on a timer */
+.wcard, .wcard.on { transition: none; }
+/* the traced engine photo is thousands of short strokes: plain joins and caps rasterise faster and look the same at this weight */
+#engbay .eng path { stroke-linejoin: miter; stroke-linecap: butt; }
+
+/* phone and desktop variants of labels inside the drawing */
+#world[data-m="1"] .rd, #world[data-m="0"] .rm { display: none; }
+.wcard.na::after { display: none; }
+
+/* pages additions */
+.out > div.wide { grid-column: 1 / -1; }
+.out > div.wide p { max-width: 40rem; }
+.travel-map svg { display: block; width: 100%; height: auto; }
+.travel-map { background: var(--ink-2); }
+.tm-mob { display: none; }
+@media (max-width: 1040px) {
+  .tm-desk:not(.tm-only) { display: none; }
+  .tm-mob { display: block; }
+}
+.tm-mob svg { max-width: 34rem; margin: 0 auto; }
+.out > div.wide .pic.empty { aspect-ratio: 16 / 7; }
+
+@media (min-width: 881px) { .out { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* missing images never show hints */
+.pic.empty::after, .shot.empty::after { content: none; }
+.shots.one img, .shots.one .shot { width: 100%; }
+
+/* police photo row: equal heights, aligned captions */
+.shots.three { grid-template-columns: minmax(0, 1.33fr) minmax(0, 1.6fr) minmax(0, 0.85fr); align-items: stretch; gap: 1rem; }
+.shots.three .ph { display: flex; flex-direction: column; }
+.shots.three .ph img { width: 100%; height: 15rem; object-fit: cover; object-position: center top; }
+.shots.three .ph:nth-child(2) img { object-position: center 70%; }
+@media (max-width: 880px) {
+  .shots.three { grid-template-columns: minmax(0, 1fr); }
+  .shots.three .ph img { height: auto; aspect-ratio: 4 / 3; }
+  .shots.three .ph:nth-child(3) img { aspect-ratio: 4 / 5; object-position: center 20%; }
+}
+
+/* phone nav: one tidy row */
+@media (max-width: 640px) {
+  .side { padding: 0.9rem 1rem 0.6rem; row-gap: 0.15rem; }
+  .side nav ul { flex-wrap: nowrap; justify-content: space-between; gap: 0.25rem; }
+  .side nav li { flex: 0 0 auto; }
+  .side nav a { font-size: 0.9rem; padding: 0.45rem 0.1rem; line-height: 1.1; min-height: 2rem; box-sizing: border-box; display: inline-flex; align-items: center; }
+  .main { padding-top: 2rem; }
+}
+@media (max-width: 380px) {
+  .side { padding-left: 0.85rem; padding-right: 0.85rem; }
+  .side nav a { font-size: 0.84rem; }
 }

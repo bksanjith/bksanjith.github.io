@@ -7,6 +7,7 @@
   <title>SwiftPack | Sanjith B.K.</title>
   <meta name="description" content="A packing terminal that pulls Shopee, Lazada and Shopify orders onto one screen and prints labels in one tap.">
   <link rel="stylesheet" href="styles.css">
+  <script>window.__rm=function(i){var w=i.closest('.lead-pic,.shot,.pic,figure');if(!w)return;var p=w.parentNode;w.remove();if(p&&p.classList.contains('shots')){var n=p.children.length;if(!n)p.remove();else if(n===1)p.classList.add('one');}};</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -20,12 +21,12 @@
     <div class="col">
 
       <a class="back" href="projects.html">Back to projects</a>
-      <p class="kind">Personal, for Fragrance Castle</p>
+      <p class="kind">Professional, for Fragrance Castle</p>
       <h1 class="p-title">SwiftPack</h1>
       <p class="lede">A packing terminal that pulls Shopee, Lazada and Shopify orders onto one screen and prints labels in one tap.</p>
       <dl class="specs"><div><dt>Role</dt><dd>Solo build</dd></div><div><dt>Stack</dt><dd>Raspberry Pi, Python</dd></div><div><dt>First label</dt><dd>4 min → 42 s</dd></div><div><dt>Each label after</dt><dd>30 s → 10 s</dd></div></dl>
       <div class="case">
-  <div class="lead-pic"><div class="shot" data-hint="Photo to add: the terminal on the packing bench (save as swiftpack.jpg)"><img src="swiftpack.jpg" alt="SwiftPack" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></div></div>
+  <div class="lead-pic"><div class="shot"><img src="swiftpack.jpg" alt="SwiftPack" data-opt onerror="__rm(this)"></div></div>
 <section class="section"><h2>The problem</h2><div class="prose"><p>Fragrance Castle sells on Shopee, Lazada and Shopify. Each has its own seller portal, its own sign-in and its own way of making a shipping label. Packing an order meant signing in, finding it, downloading the label and sending it to the printer, then doing it all again on the next platform.</p>
 <p>Packing was never the slow part. <strong>The time went into everything around it.</strong> The first label of the day took about 4 minutes, mostly sign-ins, and every label after that took about 30 seconds.</p></div></section>
 <section class="section"><h2>What I built</h2><div class="prose"><p>A small terminal that sits on the packing bench. It goes straight past the sign-in step, pulls pending orders from all three platforms through their APIs, and prints the label with one tap.</p>
@@ -34,7 +35,7 @@
 <li><strong>Software:</strong> Python, with requests for the platform APIs and Flask for the interface</li>
 <li><strong>Interface:</strong> modelled on the Bambu Lab X1C printer screen, with big touch targets and very little text, because it gets used in a hurry with full hands</li>
 </ul>
-<div class="shots"><div class="shot empty" data-hint="Screenshot to add: order list"></div><div class="shot empty" data-hint="Screenshot to add: print view"></div></div></div></section>
+</div></section>
 <section class="section"><h2>Results</h2><div class="prose"><table class="results">
 <tr><td>First label of the day</td><td>4 min to <strong>42 s</strong></td></tr>
 <tr><td>Each label after that</td><td>30 s to <strong>10 s</strong></td></tr>
@@ -48,12 +49,13 @@
 </ul></div></section>
 
 
-        <section class="section"><nav class="pager" aria-label="More projects"><a class="nx" href="fragrance-castle.html"><small>Next</small><span class="t">Fragrance Castle</span></a></nav></section>
+        <section class="section"><nav class="pager" aria-label="More projects"><a class="nx" href="solar-dryer.html"><small>Next</small><span class="t">Solar food dryer</span></a></nav></section>
       </div>
 
       <footer class="foot"><span>Sanjith Bangalore Kumaraswamy</span><span>Based in Singapore</span></footer>
     </div>
   </main>
 </div>
+<script>document.querySelectorAll('img[data-opt]').forEach(function(i){if(i.complete&&!i.naturalWidth)__rm(i)});</script>
 </body>
 </html>
